@@ -1,5 +1,6 @@
 // app/ui-test/page.tsx
 
+import { PlayerStatsChart } from '@/components/features/PlayerStatsChart'
 import { Button } from '@/components/ui/Button'
 import {
   DropdownMenu,
@@ -78,6 +79,17 @@ export default function UITestPage() {
             CPBL 官網連結
           </a>
         </Button>
+      </section>
+      <section>
+        <PlayerStatsChart
+          data={[
+            { name: '全壘打', value: 29 },
+            { name: '打點', value: 88 },
+            { name: '安打', value: 135 },
+            { name: '打擊率', value: 0.32 }, // 打擊率通常是小數
+            { name: '盜壘', value: 15 },
+          ]}
+        />
       </section>
     </div>
   )
