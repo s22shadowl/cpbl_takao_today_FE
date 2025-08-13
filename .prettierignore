@@ -1,0 +1,17 @@
+# Dependencies
+node_modules
+
+# Next.js
+.next
+
+# Build artifacts
+build
+dist
+
+# Lock files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# OS-specific
+.DS_Store
