@@ -8,6 +8,7 @@ export enum APIErrorCode {
   // 一般錯誤
   InvalidInput = 'INVALID_INPUT',
   ResourceNotFound = 'RESOURCE_NOT_FOUND',
+  PlayerNotFound = 'PLAYER_NOT_FOUND',
   AuthenticationFailed = 'AUTHENTICATION_FAILED',
   PermissionDenied = 'PERMISSION_DENIED',
 
