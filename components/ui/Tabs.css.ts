@@ -1,46 +1,48 @@
 // components/ui/Tabs.css.ts
 
 import { style } from '@vanilla-extract/css'
+import { vars } from '@/styles/theme.css'
 
 export const tabsRoot = style({
   display: 'flex',
   flexDirection: 'column',
   width: '100%',
+  fontFamily: vars.fontFamily.body,
 })
 
 export const tabsList = style({
   flexShrink: 0,
   display: 'flex',
-  borderBottom: '1px solid #e2e8f0', // gray-200
+  borderBottom: `1px solid ${vars.colors.border}`,
 })
 
 export const tabsTrigger = style({
   fontFamily: 'inherit',
   backgroundColor: 'transparent',
-  padding: '8px 16px',
+  padding: `${vars.space.sm} ${vars.space.md}`,
   height: '45px',
   flex: 1,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  fontSize: '15px',
+  fontSize: vars.fontSizes.base,
   lineHeight: 1,
-  color: '#475569', // slate-600
+  color: vars.colors.textSecondary,
   userSelect: 'none',
   border: 'none',
   cursor: 'pointer',
   transition: 'color 0.2s ease-in-out, border-bottom 0.2s ease-in-out',
   borderBottom: '2px solid transparent',
-  marginBottom: '-1px', // 讓底線與 List 的 border 重疊
+  marginBottom: '-1px',
 
   ':hover': {
-    color: '#0f172a', // slate-900
+    color: vars.colors.textPrimary,
   },
 
   selectors: {
     '&[data-state="active"]': {
-      color: '#2563eb', // blue-600
-      borderColor: '#2563eb', // blue-600
+      color: vars.colors.primary,
+      borderColor: vars.colors.primary,
       fontWeight: 500,
     },
   },
@@ -48,8 +50,8 @@ export const tabsTrigger = style({
 
 export const tabsContent = style({
   flexGrow: 1,
-  padding: '20px',
-  backgroundColor: 'white',
+  padding: vars.space.lg,
+  backgroundColor: vars.colors.surface,
   borderBottomLeftRadius: '6px',
   borderBottomRightRadius: '6px',
   outline: 'none',

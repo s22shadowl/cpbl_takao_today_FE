@@ -43,8 +43,6 @@ export const useGetPlayerPerformanceToday = () => {
     }
   }
 
-  console.log(performances)
-
   return {
     data: performances,
     isLoading,

@@ -2,9 +2,10 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import QueryProvider from '@/components/providers/QueryProvider' // <-- 匯入 Provider
+import QueryProvider from '@/components/providers/QueryProvider'
 import { Navbar } from '@/components/ui/Navbar'
 import { Footer } from '@/components/ui/Footer'
+import { ThemeProvider } from '@/components/providers/ThemeProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -21,16 +22,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <header>
-          <Navbar />
-        </header>
-        <QueryProvider>
-          {/* <-- 在此處包裹 children */}
-          {children}
-        </QueryProvider>
-        <footer>
-          <Footer />
-        </footer>
+        <ThemeProvider>
+          <header>
+            <Navbar />
+          </header>
+          <QueryProvider>{children}</QueryProvider>
+          <footer>
+            <Footer />
+          </footer>
+        </ThemeProvider>
       </body>
     </html>
   )
