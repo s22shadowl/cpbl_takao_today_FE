@@ -6,7 +6,8 @@ import { type NextRequest } from 'next/server'
 async function handler(
   req: NextRequest,
   // 我們仍然接收 context，但不再優先使用它的 params
-  { _params }: { _params: { slug: string[] } }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+  context: any
 ) {
   // 1. 從環境變數讀取後端 API 的 URL 和金鑰
   const backendApiUrl = process.env.BACKEND_API_URL
