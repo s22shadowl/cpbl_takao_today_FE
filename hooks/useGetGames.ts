@@ -20,10 +20,11 @@ export type Game = NonNullable<GamesResponse>[number]
 export const useGetGames = (gameDate: string) => {
   return useQuery<Game[]>({
     // queryKey 包含 gameDate，確保不同日期的查詢會被獨立快取
-    queryKey: ['games', gameDate], // 呼叫符合 API 規格的端點
-
-    queryFn: () => apiClient<Game[]>(`games/${gameDate}`), // 只有在 gameDate 有值的時候才執行查詢
-
+    queryKey: ['games', gameDate],
+    queryFn: () => apiClient.get<Game[]>(`games/${gameDate}`),
+    // 只有在 gameDate 有值的時候才執行查詢
     enabled: !!gameDate,
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
   })
 }

@@ -1,4 +1,4 @@
-// lib/apiClient.ts
+// /lib/apiClient.ts
 
 import { APIErrorCode, ApiError } from './errors'
 // 導入自動生成的型別。假設後端 OpenAPI 規格中定義了一個名為 HTTPValidationError 的錯誤結構。
@@ -9,13 +9,13 @@ import type { components } from '@/types/generated-api'
 type ErrorResponse = components['schemas']['HTTPValidationError']
 
 /**
- * 通用的 API 客戶端函式。
+ * 內部通用的 API 請求函式。
  * @param endpoint BFF API 的端點路徑 (不含 /api 前綴)。
  * @param options fetch 的選項。
  * @returns 解析後的 JSON 資料。
  * @throws {ApiError} 當 API 回應不成功時。
  */
-export async function apiClient<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+async function baseApiClient<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const defaultHeaders = {
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -65,11 +65,71 @@ export async function apiClient<T>(endpoint: string, options: RequestInit = {}):
     }
 
     throw new ApiError(errorPayload.message, errorPayload.code, requestId)
-  } // 處理沒有回應主體的情況 (例如 204 No Content)
+  }
 
+  // 處理沒有回應主體的情況 (例如 204 No Content)
   if (response.status === 204) {
     return undefined as T
   }
 
   return response.json() as Promise<T>
+}
+
+type GetParams = Record<string, string | number | string[] | null | undefined>
+
+/**
+ * 將 params 物件序列化為查詢字串，並支援陣列。
+ * @param params 參數物件
+ * @returns URL 查詢字串
+ */
+function serializeParams(params: GetParams): string {
+  const searchParams = new URLSearchParams()
+  for (const key in params) {
+    if (Object.prototype.hasOwnProperty.call(params, key)) {
+      const value = params[key]
+      if (value === null || value === undefined) {
+        continue
+      }
+
+      if (Array.isArray(value)) {
+        value.forEach((item) => {
+          searchParams.append(key, item)
+        })
+      } else {
+        searchParams.append(key, String(value))
+      }
+    }
+  }
+  return searchParams.toString()
+}
+
+/**
+ * API 客戶端
+ */
+export const apiClient = {
+  /**
+   * 發送 GET 請求。
+   * @param endpoint API 端點路徑。
+   * @param options 包含 `params` 物件的選項。
+   * @returns 解析後的 JSON 資料。
+   */
+  get: async <T>(
+    endpoint: string,
+    options?: { params?: GetParams; headers?: RequestInit['headers'] }
+  ): Promise<T> => {
+    let url = endpoint
+    if (options?.params) {
+      const queryString = serializeParams(options.params)
+      if (queryString) {
+        url += `?${queryString}`
+      }
+    }
+    return baseApiClient<T>(url, {
+      method: 'GET',
+      headers: options?.headers,
+    })
+  },
+
+  // 未來可在此擴展 post, put, delete 等方法
+  // post: async <T> ...
 }

@@ -44,7 +44,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/players/{player_name}/stats/history': {
+  '/api/players/stats/history': {
     parameters: {
       query?: never
       header?: never
@@ -53,9 +53,11 @@ export interface paths {
     }
     /**
      * Get Player Stats History
-     * @description 獲取指定球員的球季數據歷史紀錄，支援日期篩選與分頁。
+     * @description 獲取指定**一個或多個**球員的球季數據歷史紀錄，支援日期篩選。
+     *
+     *     回傳格式為一個字典，key 為球員姓名，value 為該球員的數據歷史列表。
      */
-    get: operations['get_player_stats_history_api_players__player_name__stats_history_get']
+    get: operations['get_player_stats_history_api_players_stats_history_get']
     put?: never
     post?: never
     delete?: never
@@ -838,20 +840,16 @@ export interface operations {
       }
     }
   }
-  get_player_stats_history_api_players__player_name__stats_history_get: {
+  get_player_stats_history_api_players_stats_history_get: {
     parameters: {
-      query?: {
+      query: {
+        /** @description 要查詢的一個或多個球員姓名 */
+        player_name: string[]
         start_date?: string | null
         end_date?: string | null
-        /** @description 要跳過的紀錄數量 */
-        skip?: number
-        /** @description 每頁回傳的最大紀錄數量 */
-        limit?: number
       }
       header?: never
-      path: {
-        player_name: string
-      }
+      path?: never
       cookie?: never
     }
     requestBody?: never
@@ -862,7 +860,9 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['PlayerSeasonStatsHistory'][]
+          'application/json': {
+            [key: string]: components['schemas']['PlayerSeasonStatsHistory'][]
+          }
         }
       }
       /** @description Validation Error */

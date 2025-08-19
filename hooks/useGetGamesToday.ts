@@ -30,7 +30,8 @@ export type PlayerSummary = NonNullable<Game['player_summaries']>[number]
 export const useGetTodayDashboard = () => {
   return useQuery<DashboardResponse>({
     queryKey: ['dashboard', 'today'],
-    queryFn: () => apiClient<DashboardResponse>('dashboard/today'),
-    staleTime: 1000 * 60 * 5, // 儀表板資訊 5 分鐘內有效
+    queryFn: () => apiClient.get<DashboardResponse>('dashboard/today'),
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
   })
 }
