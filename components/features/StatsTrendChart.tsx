@@ -13,8 +13,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 
-// 假設樣式檔案也已更名或調整，此處暫時註解
-// import { chartContainer, tooltipWrapper } from './StatsTrendChart.css'
+import { chartContainer, tooltipWrapper } from './StatsTrendChart.css'
 
 // --- 型別定義 ---
 // 新的數據點型別，適用於趨勢圖
@@ -49,7 +48,8 @@ export const StatsTrendChart = ({
         height: 400,
         maxWidth: '800px',
         margin: '0 auto',
-      }} /* className={chartContainer} */
+      }}
+      className={chartContainer}
     >
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
@@ -68,7 +68,7 @@ export const StatsTrendChart = ({
           {/* Y 軸 */}
           <YAxis />
           {/* 滑鼠懸停時的提示框 */}
-          <Tooltip /* wrapperClassName={tooltipWrapper} */ />
+          <Tooltip wrapperClassName={tooltipWrapper} />
           {/* 圖例 */}
           <Legend />
           {/* 主要的數據曲線 */}
