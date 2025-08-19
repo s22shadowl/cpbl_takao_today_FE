@@ -51,5 +51,7 @@ export const useGetPlayersSeasonStats = ({
     },
     // 只有當 playerNames 陣列不為空時才執行查詢
     enabled: playerNames.length > 0,
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
   })
 }
