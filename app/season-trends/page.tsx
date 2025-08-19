@@ -62,7 +62,7 @@ const MetricSelector = ({
                 e.preventDefault()
                 handleSelect(metric.key)
               }}
-              style={{ paddingLeft: '2rem' }} // 預留空間給 Check 圖示
+              style={{ paddingLeft: '2rem' }}
             >
               {isSelected && <Check size={16} style={{ position: 'absolute', left: '0.5rem' }} />}
               {metric.label}
@@ -90,10 +90,15 @@ export default function SeasonTrendsPage() {
     dateRange,
   })
 
-  const currentPlayerStats = React.useMemo(
-    () => (data && selectedPlayer ? data[selectedPlayer] || [] : []),
-    [data, selectedPlayer]
-  )
+  const currentPlayerStats = React.useMemo(() => {
+    if (!data || !selectedPlayer) return []
+    const playerData = data[selectedPlayer] || []
+    return [...playerData].sort(
+      (a, b) =>
+        new Date(a.data_retrieved_date || 0).getTime() -
+        new Date(b.data_retrieved_date || 0).getTime()
+    )
+  }, [data, selectedPlayer])
 
   const activeChartMetrics = React.useMemo(
     () => PLAYER_STATS_METRICS.filter((metric) => selectedMetrics.includes(metric.key)),

@@ -28,15 +28,14 @@ type Preset = '7d' | '30d' | 'season'
 export const DateRangePicker: React.FC<DateRangePickerProps> = ({ onRangeChange }) => {
   const [label, setLabel] = React.useState('最近 30 天')
   const [popoverOpen, setPopoverOpen] = React.useState(false)
-  const [range, setRange] = React.useState<DateRange | undefined>(undefined)
-
-  React.useEffect(() => {
-    // 初始化預設值
+  const [range, setRange] = React.useState<DateRange | undefined>(() => {
+    // 內部狀態的初始化，與父元件同步
     const today = new Date()
     const start = addDays(today, -29)
-    onRangeChange({ start, end: today })
-    setRange({ from: start, to: today })
-  }, [onRangeChange])
+    return { from: start, to: today }
+  })
+
+  // 讓父元件全權負責初始狀態，子元件只負責響應使用者操作並通知父層
 
   const handlePresetSelect = (preset: Preset) => {
     const today = new Date()
@@ -49,7 +48,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ onRangeChange 
         newLabel = '最近 7 天'
         break
       case 'season':
-        start = startOfYear(today) // 假設賽季從年初開始
+        start = startOfYear(today)
         newLabel = '本賽季'
         break
       case '30d':
@@ -71,7 +70,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ onRangeChange 
       setLabel(
         `${format(selectedRange.from, 'yyyy-MM-dd')} ~ ${format(selectedRange.to, 'yyyy-MM-dd')}`
       )
-      setPopoverOpen(false) // 選擇完畢後關閉
+      setPopoverOpen(false)
     }
   }
 
@@ -90,7 +89,6 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ onRangeChange 
           <DropdownMenuItem onSelect={() => handlePresetSelect('season')}>本賽季</DropdownMenuItem>
           <DropdownMenuSeparator />
           <Popover.Trigger asChild>
-            {/* onSelect 需 preventDefault 以免觸發 DropdownMenu 的關閉事件 */}
             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>自訂範圍...</DropdownMenuItem>
           </Popover.Trigger>
         </DropdownMenuContent>

@@ -12,22 +12,37 @@ export const container = style({
 
 export const header = style({
   display: 'flex',
-  flexWrap: 'wrap', // 允許換行以適應 RWD
+  flexWrap: 'wrap',
   justifyContent: 'space-between',
   alignItems: 'center',
   gap: vars.space.md,
   marginBottom: vars.space.xl,
+
+  '@media': {
+    'screen and (max-width: 768px)': {
+      flexDirection: 'column',
+      alignItems: 'stretch', // 讓內容撐滿寬度
+    },
+  },
 })
 
 export const title = style({
   fontSize: vars.fontSizes.xxl,
   fontWeight: 600,
   color: vars.colors.textPrimary,
-  marginRight: 'auto', // 讓標題佔據左側空間
+  marginRight: 'auto',
+
+  '@media': {
+    'screen and (max-width: 768px)': {
+      marginRight: 0,
+      marginBottom: vars.space.md,
+    },
+  },
 })
 
 export const controlsContainer = style({
   display: 'flex',
+  flexWrap: 'wrap', // 允許控制器換行
   gap: vars.space.md,
   alignItems: 'center',
 })
