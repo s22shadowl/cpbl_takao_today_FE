@@ -4,7 +4,7 @@
 
 import * as React from 'react'
 import { addDays } from 'date-fns'
-import { Check } from 'lucide-react'
+import { Check, Loader2 } from 'lucide-react' // 導入 Loader2 圖示
 import * as Collapsible from '@radix-ui/react-collapsible'
 import {
   DropdownMenu,
@@ -85,7 +85,7 @@ export default function SeasonTrendsPage() {
   const [selectedPlayer, setSelectedPlayer] = React.useState<string>(TRENDING_PLAYERS[0])
   const [selectedMetrics, setSelectedMetrics] = React.useState<string[]>(['avg', 'ops'])
 
-  const { data, isLoading, isError, error } = useGetPlayersSeasonStats({
+  const { data, isLoading, isFetching, isError, error } = useGetPlayersSeasonStats({
     playerNames: TRENDING_PLAYERS,
     dateRange,
   })
@@ -119,7 +119,9 @@ export default function SeasonTrendsPage() {
   )
 
   const renderContent = () => {
+    // 僅在初次載入時顯示全螢幕 Loading
     if (isLoading) return <div className={styles.loadingOrErrorState}>Loading...</div>
+
     if (isError) {
       return (
         <div className={styles.loadingOrErrorState}>
@@ -127,24 +129,34 @@ export default function SeasonTrendsPage() {
         </div>
       )
     }
+
+    // 當有數據時，即使在背景更新 (isFetching) 中也繼續渲染內容
     if (data) {
       return (
-        <div className={styles.contentContainer}>
-          <StatsTrendChart data={currentPlayerStats} metrics={activeChartMetrics} />
-
-          <Collapsible.Root>
-            <Collapsible.Trigger asChild>
-              <button className={styles.collapsibleTrigger}>顯示/隱藏 每日詳細數據</button>
-            </Collapsible.Trigger>
-            <Collapsible.Content>
-              <div className={styles.collapsibleContent}>
-                <DataTable data={currentPlayerStats} columns={tableColumns} />
-              </div>
-            </Collapsible.Content>
-          </Collapsible.Root>
+        <div className={styles.dataDisplayContainer}>
+          {/* 當 isFetching 為 true 時，顯示載入遮罩 */}
+          {isFetching && (
+            <div className={styles.loadingOverlay}>
+              <Loader2 size={32} className={styles.spinner} />
+            </div>
+          )}
+          <div className={styles.contentContainer}>
+            <StatsTrendChart data={currentPlayerStats} metrics={activeChartMetrics} />
+            <Collapsible.Root>
+              <Collapsible.Trigger asChild>
+                <button className={styles.collapsibleTrigger}>顯示/隱藏 每日詳細數據</button>
+              </Collapsible.Trigger>
+              <Collapsible.Content>
+                <div className={styles.collapsibleContent}>
+                  <DataTable data={currentPlayerStats} columns={tableColumns} />
+                </div>
+              </Collapsible.Content>
+            </Collapsible.Root>
+          </div>
         </div>
       )
     }
+
     return null
   }
 

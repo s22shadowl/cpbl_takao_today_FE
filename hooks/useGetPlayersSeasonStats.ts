@@ -53,5 +53,6 @@ export const useGetPlayersSeasonStats = ({
     enabled: playerNames.length > 0,
     refetchOnWindowFocus: false,
     staleTime: Infinity,
+    placeholderData: (prev) => prev,
   })
 }

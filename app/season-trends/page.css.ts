@@ -1,7 +1,35 @@
 // /app/season-trends/page.css.ts
 
-import { style } from '@vanilla-extract/css'
+import { style, keyframes } from '@vanilla-extract/css'
 import { vars } from '@/styles/theme.css'
+
+const spin = keyframes({
+  '0%': { transform: 'rotate(0deg)' },
+  '100%': { transform: 'rotate(360deg)' },
+})
+
+export const dataDisplayContainer = style({
+  position: 'relative',
+})
+
+export const loadingOverlay = style({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(255, 255, 255, 0.7)',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  zIndex: 10,
+  borderRadius: '8px',
+  transition: 'opacity 0.2s ease-in-out',
+})
+
+export const spinner = style({
+  animation: `${spin} 1s linear infinite`,
+})
 
 export const container = style({
   maxWidth: '1200px',
@@ -17,11 +45,10 @@ export const header = style({
   alignItems: 'center',
   gap: vars.space.md,
   marginBottom: vars.space.xl,
-
   '@media': {
     'screen and (max-width: 768px)': {
       flexDirection: 'column',
-      alignItems: 'stretch', // 讓內容撐滿寬度
+      alignItems: 'stretch',
     },
   },
 })
@@ -31,7 +58,6 @@ export const title = style({
   fontWeight: 600,
   color: vars.colors.textPrimary,
   marginRight: 'auto',
-
   '@media': {
     'screen and (max-width: 768px)': {
       marginRight: 0,
@@ -42,7 +68,7 @@ export const title = style({
 
 export const controlsContainer = style({
   display: 'flex',
-  flexWrap: 'wrap', // 允許控制器換行
+  flexWrap: 'wrap',
   gap: vars.space.md,
   alignItems: 'center',
 })
