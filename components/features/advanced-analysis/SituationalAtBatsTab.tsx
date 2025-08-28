@@ -9,20 +9,11 @@ import * as styles from './SituationalAtBatsTab.css'
 
 type RunnersSituation = components['schemas']['RunnersSituation']
 
-// --- 輔助資料 ---
-const mockGameData = [
-  { game_date: '2024-08-15', opponent: '中信兄弟' },
-  { game_date: '2024-08-12', opponent: '味全龍' },
-  { game_date: '2024-08-05', opponent: '統一7-ELEVEn獅' },
-  { game_date: '2024-07-28', opponent: '富邦悍將' },
-  { game_date: '2024-07-21', opponent: '樂天桃猿' },
-]
-
 // 將情境代碼轉換為中文，方便顯示提示訊息
 const situationToText: Record<RunnersSituation, string> = {
   bases_loaded: '滿壘時',
   scoring_position: '得點圈',
-  bases_empty: '壘上無人時',
+  bases_empty: '壘上無人',
 }
 
 // --- 子元件 ---
@@ -67,19 +58,17 @@ const PlayerSituationalAtBatsTable: React.FC<{
           </tr>
         </thead>
         <tbody>
-          {data.map((atBat, index) => {
-            const game = mockGameData[index % mockGameData.length]
-            return (
-              <tr key={atBat.id} className={styles.tableRow}>
-                <td className={styles.tableCell}>{game.game_date}</td>
-                <td className={styles.tableCell}>{game.opponent}</td>
-                <td className={styles.tableCell}>{atBat.inning}</td>
-                <td className={styles.tableCell}>{atBat.opposing_pitcher_name}</td>
-                <td className={styles.tableCell}>{atBat.result_short}</td>
-                <td className={styles.tableCell}>{atBat.runs_scored_on_play}</td>
-              </tr>
-            )
-          })}
+          {data.map((atBat) => (
+            <tr key={atBat.id} className={styles.tableRow}>
+              {/* 使用 API 回傳的真實數據 */}
+              <td className={styles.tableCell}>{atBat.game_date}</td>
+              <td className={styles.tableCell}>{atBat.opponent_team}</td>
+              <td className={styles.tableCell}>{atBat.inning}</td>
+              <td className={styles.tableCell}>{atBat.opposing_pitcher_name}</td>
+              <td className={styles.tableCell}>{atBat.result_short}</td>
+              <td className={styles.tableCell}>{atBat.runs_scored_on_play}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

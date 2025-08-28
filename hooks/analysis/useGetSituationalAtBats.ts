@@ -4,8 +4,8 @@ import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/apiClient'
 import type { components } from '@/types/generated-api'
 
-// 從 generated-api.ts 導入所需的資料型別
-type AtBatDetail = components['schemas']['AtBatDetail']
+// 更新回傳資料的型別
+type SituationalAtBatDetail = components['schemas']['SituationalAtBatDetail']
 type RunnersSituation = components['schemas']['RunnersSituation']
 
 /**
@@ -14,19 +14,19 @@ type RunnersSituation = components['schemas']['RunnersSituation']
  * @param playerName - 球員姓名。
  * @param situation - 壘上跑者情境。
  * @param options - TanStack Query 的 useQuery 選項。
- * @returns TanStack Query 的查詢結果，包含 AtBatDetail 陣列。
+ * @returns TanStack Query 的查詢結果，包含 SituationalAtBatDetail 陣列。
  */
 export const useGetSituationalAtBats = (
   playerName: string,
   situation: RunnersSituation,
   options?: { enabled?: boolean }
 ) => {
-  return useQuery<AtBatDetail[], Error>({
+  return useQuery<SituationalAtBatDetail[], Error>({
     // queryKey 包含 Hook 名稱和所有參數，以確保唯一性
     queryKey: ['useGetSituationalAtBats', playerName, situation],
     queryFn: async () => {
       // 呼叫 apiClient，並將 situation 作為查詢參數傳遞
-      const response = await apiClient.get<AtBatDetail[]>(
+      const response = await apiClient.get<SituationalAtBatDetail[]>(
         `/analysis/players/${playerName}/situational-at-bats`,
         {
           params: { situation },
