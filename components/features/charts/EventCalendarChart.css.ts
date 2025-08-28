@@ -10,24 +10,47 @@ import { transparentize } from 'polished'
 export const container = style({
   position: 'relative',
   padding: `0 ${vars.space.xl}`,
+  backgroundColor: vars.colors.surface,
+  borderRadius: '8px',
+  border: `1px solid ${vars.colors.border}`,
+})
+
+/**
+ * 元件標頭，包含主標題與副標題。
+ */
+export const chartHeader = style({
+  padding: `${vars.space.lg} ${vars.space.lg} 0`,
+  textAlign: 'center',
+})
+
+export const title = style({
+  fontSize: vars.fontSizes.xl,
+  fontWeight: 600,
+  color: vars.colors.textPrimary,
+})
+
+export const subtitle = style({
+  fontSize: vars.fontSizes.sm,
+  color: vars.colors.textSecondary,
+  marginTop: vars.space.xs,
 })
 
 /**
  * 日曆的標頭，包含月份標題和週標題。
  */
-export const header = style({
+export const calendarHeader = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  marginBottom: vars.space.md,
+  padding: `${vars.space.lg} 0 ${vars.space.md}`,
 })
 
 /**
  * 月份標題的樣式。
  */
 export const monthTitle = style({
-  fontSize: vars.fontSizes.xl,
-  fontWeight: 600,
+  fontSize: vars.fontSizes.lg,
+  fontWeight: 500,
   color: vars.colors.textPrimary,
   marginBottom: vars.space.lg,
 })
@@ -43,7 +66,6 @@ export const weekHeader = style({
   fontSize: vars.fontSizes.sm,
   color: vars.colors.textSecondary,
   paddingBottom: vars.space.sm,
-  borderBottom: `1px solid ${vars.colors.border}`,
 })
 
 /**
@@ -54,9 +76,7 @@ export const calendarGrid = style({
   gridTemplateColumns: 'repeat(7, 1fr)',
   gap: '1px',
   backgroundColor: vars.colors.border,
-  border: `1px solid ${vars.colors.border}`,
-  borderRadius: '4px',
-  overflow: 'hidden',
+  borderTop: `1px solid ${vars.colors.border}`,
   position: 'relative', // 用於定位分隔線
 })
 
@@ -78,6 +98,7 @@ export const cell = style({
   ':hover': {
     transform: 'scale(1.05)',
     zIndex: 2,
+    boxShadow: '0 0 10px rgba(0,0,0,0.1)',
   },
 })
 
@@ -87,27 +108,37 @@ export const cell = style({
 export const otherMonthCell = style({
   color: vars.colors.textSecondary,
   backgroundColor: vars.colors.background,
+  cursor: 'default',
   ':hover': {
     transform: 'none',
+    boxShadow: 'none',
   },
 })
 
 /**
- * 無比賽日的格子樣式。
+ * 無比賽日 (isGameDay: false): Default 狀態
  */
 export const noGameDayCell = style({
   backgroundColor: vars.colors.background,
 })
 
 /**
- * 有比賽日的格子樣式。
+ * 有比賽但未出賽 (isGameDay: true, hasAppearance: false)
  */
-export const gameDayCell = style({
-  backgroundColor: transparentize(0.7, vars.colors.secondary),
+export const gameDayNoAppearanceCell = style({
+  backgroundColor: transparentize(0.8, vars.colors.secondary),
 })
 
 /**
- * 符合特定情境的突顯日格子樣式。
+ * 有出賽 (hasAppearance: true)
+ */
+export const hasAppearanceCell = style({
+  backgroundColor: vars.colors.secondary,
+  color: vars.colors.textPrimary,
+})
+
+/**
+ * 符合情境 (isHighlighted: true)
  */
 export const highlightedCell = style({
   backgroundColor: vars.colors.primary,
@@ -150,6 +181,7 @@ export const weekSeparator = style({
   bottom: 0,
   width: '1px',
   backgroundColor: vars.colors.border,
+  zIndex: 1,
 })
 
 /**
@@ -158,7 +190,6 @@ export const weekSeparator = style({
 export const navButton = style({
   position: 'absolute',
   top: '50%',
-  transform: 'translateY(-50%)',
   backgroundColor: vars.colors.surface,
   border: `1px solid ${vars.colors.border}`,
   borderRadius: '50%',
@@ -169,10 +200,11 @@ export const navButton = style({
   justifyContent: 'center',
   cursor: 'pointer',
   zIndex: 3,
-  transition: 'background-color 0.2s',
+  transition: 'background-color 0.2s, transform 0.2s',
 
   ':hover': {
     backgroundColor: vars.colors.background,
+    transform: 'translateY(-50%) scale(1.1)',
   },
 })
 
