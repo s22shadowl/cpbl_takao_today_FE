@@ -4,38 +4,17 @@
 
 import React from 'react'
 import { useGetLastHomerun } from '@/hooks/analysis/useGetLastHomerun'
+import { StatItem } from '@/components/ui/StatItem'
 import * as styles from './HomerunTrackingTab.css'
-import { calculateMilestone, type CareerData } from './utils'
+import { calculateMilestone } from './utils'
 import { homeruns_tab_players } from '@/lib/constants'
-
-// --- 假數據 ---
-
-/**
- * 模擬後端未來會提供的生涯數據。
- */
-const mockCareerData: Record<string, CareerData> = {
-  王柏融: {
-    total_homeruns: 88,
-    total_PA: 2500,
-    total_game_played: 600,
-    debut_date: '2019-03-29',
-  },
-  魔鷹: {
-    total_homeruns: 101,
-    total_PA: 3000,
-    total_game_played: 800,
-    debut_date: '2017-05-10',
-  },
-}
 
 // --- 子元件 ---
 
 const PlayerStatsCard: React.FC<{
   playerName: string
 }> = ({ playerName }) => {
-  // 將 Hook 呼叫移至此元件內部，以便在迴圈中安全使用
   const { data, isLoading, isError, error } = useGetLastHomerun(playerName)
-  const milestoneData = calculateMilestone(mockCareerData[playerName])
 
   if (isLoading) {
     return <div className={styles.card}>正在載入 {playerName} 的數據...</div>
@@ -61,28 +40,18 @@ const PlayerStatsCard: React.FC<{
     )
   }
 
+  const milestoneData = data.career_stats ? calculateMilestone(data.career_stats) : null
+
   return (
     <div className={styles.card}>
       {/* 上半部：最後一轟資訊 */}
       <div>
         <h3 className={styles.playerName}>{playerName}</h3>
         <div className={styles.statsGrid}>
-          <div className={styles.statItem}>
-            <span className={styles.statLabel}>最後開轟日期</span>
-            <span className={styles.statValue}>{data.game_date}</span>
-          </div>
-          <div className={styles.statItem}>
-            <span className={styles.statLabel}>距今天數</span>
-            <span className={styles.statValue}>{data.days_since} 天</span>
-          </div>
-          <div className={styles.statItem}>
-            <span className={styles.statLabel}>經過場次</span>
-            <span className={styles.statValue}>{data.games_since} 場</span>
-          </div>
-          <div className={styles.statItem}>
-            <span className={styles.statLabel}>經過打數</span>
-            <span className={styles.statValue}>{data.at_bats_since} 個</span>
-          </div>
+          <StatItem label="最後開轟日期" value={data.game_date} />
+          <StatItem label="距今天數" value={`${data.days_since} 天`} />
+          <StatItem label="經過場次" value={`${data.games_since} 場`} />
+          <StatItem label="經過打數" value={`${data.at_bats_since} 個`} />
         </div>
         <div className={styles.sectionSeparator}>
           <p>
@@ -98,13 +67,19 @@ const PlayerStatsCard: React.FC<{
       {milestoneData && (
         <div className={styles.sectionSeparator}>
           <h4 className={styles.milestoneTitle}>百轟進度</h4>
-          <p className={styles.milestoneText}>
-            目前累積：{milestoneData.total_homeruns} 支<br />
-            距離下一個百轟還有：{milestoneData.homerunsNeeded} 支<br />
-            依照目前速度，預計還需要：{milestoneData.estimatedDays} 天 /{' '}
-            {milestoneData.estimatedGames} 場出賽 / {milestoneData.estimatedPA} 個打席，預計將於{' '}
-            {milestoneData.estimatedDateString} 達成
-          </p>
+          <div className={styles.statsGrid}>
+            <StatItem label="初登板日期" value={milestoneData.debut_date} />
+            <StatItem label="生涯全壘打" value={`${milestoneData.total_homeruns} 支`} />
+            <StatItem label="下一個百轟尚需" value={` ${milestoneData.homerunsNeeded} 支`} />
+            <StatItem label="平均產出週期(日)" value={` ${milestoneData.avgDaysPerHR} 天/轟`} />
+            <StatItem label="平均產出週期(場)" value={` ${milestoneData.avgGamesPerHR} 場/轟`} />
+            <StatItem label="平均產出週期(打席)" value={` ${milestoneData.avgPAPerHR} 打席/轟`} />
+          </div>
+          {/*
+           <p className={styles.milestoneText}>
+             預計將於 {milestoneData.estimatedDateString} 達成
+           </p>
+          */}
         </div>
       )}
     </div>

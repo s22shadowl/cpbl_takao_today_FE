@@ -1,51 +1,42 @@
+// components/features/advanced-analysis/utils.ts
+
 import type { components } from '@/types/generated-api'
 
 type GameResult = components['schemas']['GameResult']
-
-// 定義球員生涯數據的型別，方便共用
-export interface CareerData {
-  total_homeruns: number
-  total_PA: number
-  total_game_played: number
-  debut_date: string
-}
+type PlayerCareerStats = components['schemas']['PlayerCareerStats']
 
 /**
  * 計算百轟里程碑相關數據。
- * @param careerData - 球員的生涯數據。
+ * @param careerData - 球員的生涯數據 (來自 API)。
  * @returns 計算後的里程碑物件，或在無法計算時回傳 null。
  */
-export const calculateMilestone = (careerData: CareerData) => {
-  // ... (此函式內容未變動，保持原樣)
-  // TODO:
-  const { total_homeruns, total_PA, total_game_played, debut_date } = careerData
-  if (total_homeruns <= 0) return null
-  const nextMilestone = (Math.floor(total_homeruns / 100) + 1) * 100
-  const homerunsNeeded = nextMilestone - total_homeruns
+export const calculateMilestone = (careerData: PlayerCareerStats) => {
+  const { homeruns, plate_appearances, games_played, debut_date } = careerData
+
+  if (homeruns <= 0 || !debut_date) {
+    return null
+  }
+
+  const nextMilestone = (Math.floor(homeruns / 100) + 1) * 100
+  const homerunsNeeded = nextMilestone - homeruns
+
   const today = new Date()
   const debut = new Date(debut_date)
   const daysSinceDebut = Math.floor((today.getTime() - debut.getTime()) / (1000 * 3600 * 24))
-  const avgDaysPerHR = daysSinceDebut / total_homeruns
-  const avgGamesPerHR = total_game_played / total_homeruns
-  const avgPAPerHR = total_PA / total_homeruns
-  const estimatedDays = Math.ceil(homerunsNeeded * avgDaysPerHR)
-  const estimatedGames = Math.ceil(homerunsNeeded * avgGamesPerHR)
-  const estimatedPA = Math.ceil(homerunsNeeded * avgPAPerHR)
-  const estimatedDate = new Date(today)
-  estimatedDate.setDate(today.getDate() + estimatedDays)
-  const estimatedDateString = estimatedDate.toLocaleDateString('zh-TW', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  })
+
+  // 計算平均值
+  const avgDaysPerHR = parseFloat((daysSinceDebut / homeruns).toFixed(1))
+  const avgGamesPerHR = parseFloat((games_played / homeruns).toFixed(1))
+  const avgPAPerHR = parseFloat((plate_appearances / homeruns).toFixed(1))
+
   return {
-    total_homeruns,
+    debut_date,
+    total_homeruns: homeruns,
     nextMilestone,
     homerunsNeeded,
-    estimatedDays,
-    estimatedGames,
-    estimatedPA,
-    estimatedDateString,
+    avgDaysPerHR,
+    avgGamesPerHR,
+    avgPAPerHR,
   }
 }
 
@@ -59,15 +50,13 @@ export const getGameResultInfo = (game: GameResult, targetTeam: string) => {
   const { home_team, away_team, home_score, away_score } = game
   const isHomeTeam = home_team === targetTeam
   const opponent = isHomeTeam ? away_team : home_team
-
   let result = '平手'
   if (home_score === null || away_score === null) {
-    result = '-' // 分數未定時
+    result = '-'
   } else if (home_score! > away_score!) {
     result = isHomeTeam ? '勝利' : '落敗'
   } else if (away_score! > home_score!) {
     result = isHomeTeam ? '落敗' : '勝利'
   }
-
   return { opponent, result }
 }
