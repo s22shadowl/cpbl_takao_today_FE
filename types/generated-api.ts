@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+  '/api/games/season': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 取得年度賽果
+     * @description 根據年份取得指定球隊的全年度賽果，可用於日曆圖表的底圖。
+     */
+    get: operations['get_season_games_api_games_season_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/games/{game_date}': {
     parameters: {
       query?: never
@@ -852,6 +872,20 @@ export interface components {
       /** Date */
       date?: string | null
     }
+    /** SeasonGame */
+    SeasonGame: {
+      /**
+       * Game Date
+       * Format: date
+       */
+      game_date: string
+      /** Game Id */
+      game_id: number
+      /** Home Team */
+      home_team: string
+      /** Away Team */
+      away_team: string
+    }
     /**
      * SituationalAtBatDetail
      * @description 擴充 AtBatDetail，增加比賽日期與對戰對手資訊。
@@ -913,6 +947,40 @@ export interface components {
 }
 export type $defs = Record<string, never>
 export interface operations {
+  get_season_games_api_games_season_get: {
+    parameters: {
+      query?: {
+        /** @description 查詢的年份，預設為今年。 */
+        year?: number
+        /** @description 是否只回傳已完成的比賽。 */
+        completed_only?: boolean
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['SeasonGame'][]
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
   get_games_by_date_api_games__game_date__get: {
     parameters: {
       query?: {
