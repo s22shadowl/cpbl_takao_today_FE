@@ -10,19 +10,15 @@ import * as styles from './NPBStreaksTab.css'
 
 type OnBaseStreak = components['schemas']['OnBaseStreak']
 
-// --- 假資料 ---
-const mockOpponent = ['中信兄弟', '味全龍', '統一7-ELEVEn獅', '富邦悍將', '樂天桃猿']
-
 // --- 子元件 ---
 
-const StreakCard: React.FC<{ streak: OnBaseStreak; index: number }> = ({ streak, index }) => {
-  const opponent = mockOpponent[index % mockOpponent.length] // 循環使用假資料
-
+const StreakCard: React.FC<{ streak: OnBaseStreak }> = ({ streak }) => {
   return (
     <div className={styles.streakCard}>
       <div className={styles.cardHeader}>
         <span>{streak.game_date}</span>
-        <span>vs {opponent}</span>
+        {/* 使用 API 回傳的真實對手數據 */}
+        <span>vs {streak.opponent_team}</span>
         <span>第 {streak.inning} 局</span>
       </div>
       <div className={styles.cardContent}>
@@ -69,8 +65,8 @@ export const NPBStreaksTab: React.FC = () => {
   return (
     <div className={styles.container}>
       <h2 className={styles.totalStreaksTitle}>本季連線總次數：{data.length}</h2>
-      {data.map((streak, index) => (
-        <StreakCard key={streak.game_id + '-' + streak.inning} streak={streak} index={index} />
+      {data.map((streak) => (
+        <StreakCard key={streak.game_id + '-' + streak.inning} streak={streak} />
       ))}
     </div>
   )
