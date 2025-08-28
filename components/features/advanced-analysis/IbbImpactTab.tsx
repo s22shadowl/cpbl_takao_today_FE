@@ -9,16 +9,11 @@ import * as styles from './IbbImpactTab.css'
 
 type IbbImpactResult = components['schemas']['IbbImpactResult']
 
-// --- 假資料 ---
-const mockOpponent = ['中信兄弟', '味全龍', '統一7-ELEVEn獅', '富邦悍將', '樂天桃猿']
-
 // --- 子元件 ---
 
 const IbbImpactCard: React.FC<{
   event: IbbImpactResult
-  index: number
-}> = ({ event, index }) => {
-  const opponent = mockOpponent[index % mockOpponent.length]
+}> = ({ event }) => {
   const { intentional_walk } = event // 取得敬遠當下的打席資訊
 
   return (
@@ -26,7 +21,8 @@ const IbbImpactCard: React.FC<{
       <div className={styles.cardHeader}>
         <div className={styles.headerMain}>
           <span className={styles.headerText}>
-            {event.game_date} vs {opponent}
+            {/* 使用 API 回傳的真實對手數據 */}
+            {event.game_date} vs {event.opponent_team}
           </span>
           <span className={styles.headerText}>第 {event.inning} 局</span>
         </div>
@@ -81,8 +77,8 @@ export const IbbImpactTab: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      {data.map((event, index) => (
-        <IbbImpactCard key={event.intentional_walk.id} event={event} index={index} />
+      {data.map((event) => (
+        <IbbImpactCard key={event.intentional_walk.id} event={event} />
       ))}
     </div>
   )
