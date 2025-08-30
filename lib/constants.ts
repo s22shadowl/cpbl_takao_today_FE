@@ -6,6 +6,10 @@
 export const TARGET_TEAM = '台鋼雄鷹'
 
 /**
+ * 目標球隊名稱，用於判斷比賽勝負。
+ */
+export const TARGET_TEAM_PLAYERS = ['吳念庭', '魔鷹', '王柏融']
+/**
  * 用於「全壘打追蹤」頁籤的球員列表。
  */
 export const homeruns_tab_players = ['王柏融', '魔鷹']

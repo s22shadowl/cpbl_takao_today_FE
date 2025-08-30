@@ -9,10 +9,10 @@ import {
   endOfMonth,
   startOfWeek,
   endOfWeek,
-  addDays,
+  eachDayOfInterval,
+  isSameMonth,
   addMonths,
   subMonths,
-  isSameMonth,
 } from 'date-fns'
 import * as styles from './EventCalendarChart.css'
 import { ChevronLeft, ChevronRight } from '@/components/ui/Icons'
@@ -33,95 +33,78 @@ export interface EventCalendarChartProps {
   subtitle?: string
   data: CalendarDayData[]
   initialMonth?: Date
+  showNavigators?: boolean
   onMonthChange?: (newMonth: Date) => void
   renderTooltip: (dayData: CalendarDayData) => React.ReactNode
 }
+
+// --- 主元件 ---
 
 export const EventCalendarChart: React.FC<EventCalendarChartProps> = ({
   title,
   subtitle,
   data,
   initialMonth,
+  showNavigators = true,
   onMonthChange,
   renderTooltip,
 }) => {
-  const [currentMonth, setCurrentMonth] = useState(initialMonth || new Date())
+  const [currentMonth, setCurrentMonth] = useState(initialMonth ?? new Date())
+  const [hoveredDay, setHoveredDay] = useState<CalendarDayData | null>(null)
 
   const dataMap = useMemo(() => {
-    const map = new Map<string, CalendarDayData>()
-    data.forEach((day) => map.set(day.date, day))
-    return map
+    return new Map(data.map((d) => [d.date, d]))
   }, [data])
 
-  const handlePrevMonth = () => {
-    const newMonth = subMonths(currentMonth, 1)
+  const handleMonthChange = (newMonth: Date) => {
     setCurrentMonth(newMonth)
-    onMonthChange?.(newMonth)
+    if (onMonthChange) {
+      onMonthChange(newMonth)
+    }
   }
 
-  const handleNextMonth = () => {
-    const newMonth = addMonths(currentMonth, 1)
-    setCurrentMonth(newMonth)
-    onMonthChange?.(newMonth)
-  }
-
-  const renderCells = () => {
+  const daysInMonth = useMemo(() => {
     const monthStart = startOfMonth(currentMonth)
-    const monthEnd = endOfMonth(monthStart)
+    const monthEnd = endOfMonth(currentMonth)
     const startDate = startOfWeek(monthStart)
     const endDate = endOfWeek(monthEnd)
+    return eachDayOfInterval({ start: startDate, end: endDate })
+  }, [currentMonth])
 
-    const cells = []
-    let day = startDate
-
-    while (day <= endDate) {
-      const formattedDate = format(day, 'yyyy-MM-dd')
-      const dayData = dataMap.get(formattedDate)
-
-      const cellClasses = [
-        styles.cell,
-        !isSameMonth(day, monthStart)
-          ? styles.otherMonthCell
-          : dayData?.isHighlighted
-            ? styles.highlightedCell
-            : dayData?.hasAppearance
-              ? styles.hasAppearanceCell
-              : dayData?.isGameDay
-                ? styles.gameDayNoAppearanceCell
-                : styles.noGameDayCell,
-      ]
-        .filter(Boolean)
-        .join(' ')
-
-      cells.push(
-        <div key={formattedDate} className={cellClasses}>
-          {format(day, 'd')}
-          {dayData && isSameMonth(day, monthStart) && (
-            <div className={styles.tooltip}>{renderTooltip(dayData)}</div>
-          )}
-        </div>
-      )
-      day = addDays(day, 1)
-    }
-    return cells
+  const getCellStyle = (dayData: CalendarDayData, month: Date) => {
+    if (!isSameMonth(new Date(dayData.date), month)) return styles.otherMonthCell
+    if (dayData.isHighlighted) return styles.highlightedCell
+    if (dayData.hasAppearance) return styles.hasAppearanceCell
+    if (dayData.isGameDay) return styles.gameDayNoAppearanceCell
+    return styles.noGameDayCell
   }
 
   return (
     <div className={styles.container}>
+      {showNavigators && (
+        <>
+          <button
+            className={styles.prevButton}
+            onClick={() => handleMonthChange(subMonths(currentMonth, 1))}
+          >
+            <ChevronLeft />
+          </button>
+          <button
+            className={styles.nextButton}
+            onClick={() => handleMonthChange(addMonths(currentMonth, 1))}
+          >
+            <ChevronRight />
+          </button>
+        </>
+      )}
+
       <div className={styles.chartHeader}>
-        <h2 className={styles.title}>{title}</h2>
+        <h3 className={styles.title}>{title}</h3>
         {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
       </div>
 
-      <button onClick={handlePrevMonth} className={styles.prevButton} aria-label="上個月">
-        <ChevronLeft />
-      </button>
-      <button onClick={handleNextMonth} className={styles.nextButton} aria-label="下個月">
-        <ChevronRight />
-      </button>
-
       <div className={styles.calendarHeader}>
-        <h3 className={styles.monthTitle}>{format(currentMonth, 'yyyy 年 MM 月')}</h3>
+        <h4 className={styles.monthTitle}>{format(currentMonth, 'yyyy 年 M 月')}</h4>
         <div className={styles.weekHeader}>
           {['日', '一', '二', '三', '四', '五', '六'].map((day) => (
             <div key={day}>{day}</div>
@@ -130,15 +113,31 @@ export const EventCalendarChart: React.FC<EventCalendarChartProps> = ({
       </div>
 
       <div className={styles.calendarGrid}>
-        {/* 渲染週分隔線 */}
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div
-            key={`sep-${i}`}
-            className={styles.weekSeparator}
-            style={{ left: `calc(100% / 7 * ${i})` }}
-          />
-        ))}
-        {renderCells()}
+        {daysInMonth.map((day, index) => {
+          const dayString = format(day, 'yyyy-MM-dd')
+          const dayData = dataMap.get(dayString) ?? {
+            date: dayString,
+            isGameDay: false,
+          }
+
+          return (
+            <React.Fragment key={day.toString()}>
+              {index % 7 === 1 && (
+                <div className={styles.weekSeparator} style={{ left: `calc(${100 / 7}% * 1)` }} />
+              )}
+              <div
+                className={`${styles.cell} ${getCellStyle(dayData, currentMonth)}`}
+                onMouseEnter={() => setHoveredDay(dayData)}
+                onMouseLeave={() => setHoveredDay(null)}
+              >
+                <span className={styles.dateNumber}>{day.getDate()}</span>
+                {hoveredDay?.date === dayData.date && isSameMonth(day, currentMonth) && (
+                  <div className={styles.tooltip}>{renderTooltip(dayData)}</div>
+                )}
+              </div>
+            </React.Fragment>
+          )
+        })}
       </div>
     </div>
   )

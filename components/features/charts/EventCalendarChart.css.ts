@@ -2,7 +2,6 @@
 
 import { style } from '@vanilla-extract/css'
 import { vars } from '@/styles/theme.css'
-import { transparentize } from 'polished'
 
 /**
  * 元件最外層的容器，用於定位導覽按鈕。
@@ -103,6 +102,14 @@ export const cell = style({
 })
 
 /**
+ * 用於將日期數字與偽元素背景分離的 span 樣式。
+ */
+export const dateNumber = style({
+  position: 'relative',
+  zIndex: 1,
+})
+
+/**
  * 非當前月份日期的格子樣式。
  */
 export const otherMonthCell = style({
@@ -126,7 +133,17 @@ export const noGameDayCell = style({
  * 有比賽但未出賽 (isGameDay: true, hasAppearance: false)
  */
 export const gameDayNoAppearanceCell = style({
-  backgroundColor: transparentize(0.8, vars.colors.secondary),
+  '::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: vars.colors.secondary,
+    opacity: 0.2,
+    zIndex: 0,
+  },
 })
 
 /**

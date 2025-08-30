@@ -3,8 +3,8 @@
 'use client'
 
 import * as React from 'react'
-import { addDays } from 'date-fns'
-import { Check, Loader2 } from 'lucide-react' // 導入 Loader2 圖示
+import { addDays, startOfMonth } from 'date-fns'
+import { Check, Loader2 } from 'lucide-react'
 import * as Collapsible from '@radix-ui/react-collapsible'
 import {
   DropdownMenu,
@@ -16,15 +16,23 @@ import {
 } from '@/components/ui/DropdownMenu'
 import { Button } from '@/components/ui/Button'
 import { useGetPlayersSeasonStats } from '@/hooks/useGetPlayersSeasonStats'
-import { TRENDING_PLAYERS } from '@/lib/constants'
+import { useGetSeasonGames } from '@/hooks/useGetSeasonGames'
+import { TARGET_TEAM_PLAYERS } from '@/lib/constants'
 import { PLAYER_STATS_METRICS } from '@/lib/configs/metrics'
+import { FEATURE_FLAGS } from '@/lib/configs/featureFlags' // 引入 Feature Flag
 import { DateRangePicker } from '@/components/features/DateRangePicker'
 import { StatsTrendChart } from '@/components/features/StatsTrendChart'
+import {
+  EventCalendarChart,
+  type CalendarDayData,
+} from '@/components/features/charts/EventCalendarChart'
 import { DataTable, ColumnDef } from '@/components/ui/DataTable'
 import * as styles from './page.css'
 import type { components } from '@/types/generated-api'
 
 type PlayerSeasonStatsHistory = components['schemas']['PlayerSeasonStatsHistory']
+
+// TODO: EventCalendarChart 業務邏輯問題，待調整，先關掉，CSS待調整
 
 // --- UI 控制器元件 ---
 const MetricSelector = ({
@@ -82,23 +90,67 @@ export default function SeasonTrendsPage() {
     return { start, end }
   })
 
-  const [selectedPlayer, setSelectedPlayer] = React.useState<string>(TRENDING_PLAYERS[0])
+  const [selectedPlayer, setSelectedPlayer] = React.useState<string>(TARGET_TEAM_PLAYERS[0])
   const [selectedMetrics, setSelectedMetrics] = React.useState<string[]>(['avg', 'ops'])
 
-  const { data, isLoading, isFetching, isError, error } = useGetPlayersSeasonStats({
-    playerNames: TRENDING_PLAYERS,
+  const {
+    data: PlayersSeasonData,
+    isLoading,
+    isFetching,
+    isError,
+    error,
+  } = useGetPlayersSeasonStats({
+    playerNames: TARGET_TEAM_PLAYERS,
     dateRange,
   })
 
+  // 根據 Feature Flag 決定是否觸發此 Hook
+  const { data: seasonGames } = useGetSeasonGames({
+    year: dateRange.start.getFullYear(),
+    enabled: FEATURE_FLAGS.enableSeasonTrendsCalendar,
+  })
+
   const currentPlayerStats = React.useMemo(() => {
-    if (!data || !selectedPlayer) return []
-    const playerData = data[selectedPlayer] || []
+    if (!PlayersSeasonData || !selectedPlayer) return []
+    const playerData = PlayersSeasonData[selectedPlayer] || []
     return [...playerData].sort(
       (a, b) =>
         new Date(a.data_retrieved_date || 0).getTime() -
         new Date(b.data_retrieved_date || 0).getTime()
     )
-  }, [data, selectedPlayer])
+  }, [PlayersSeasonData, selectedPlayer])
+
+  // 僅在 Feature Flag 啟用時才計算日曆資料
+  const calendarData = React.useMemo((): CalendarDayData[] => {
+    if (
+      !FEATURE_FLAGS.enableSeasonTrendsCalendar ||
+      !seasonGames ||
+      !PlayersSeasonData ||
+      !selectedPlayer
+    ) {
+      return []
+    }
+
+    const playerStatsMap = new Map<string, PlayerSeasonStatsHistory>()
+    if (PlayersSeasonData[selectedPlayer]) {
+      PlayersSeasonData[selectedPlayer].forEach((stat) => {
+        if (stat.data_retrieved_date) {
+          playerStatsMap.set(stat.data_retrieved_date, stat)
+        }
+      })
+    }
+
+    return seasonGames.map((game) => {
+      const playerStat = playerStatsMap.get(game.game_date)
+      return {
+        date: game.game_date,
+        isGameDay: true,
+        hasAppearance: !!playerStat && playerStat.at_bats > 0,
+        isHighlighted: !!playerStat && playerStat.hits > 0,
+        payload: playerStat,
+      }
+    })
+  }, [seasonGames, PlayersSeasonData, selectedPlayer])
 
   const activeChartMetrics = React.useMemo(
     () => PLAYER_STATS_METRICS.filter((metric) => selectedMetrics.includes(metric.key)),
@@ -112,14 +164,21 @@ export default function SeasonTrendsPage() {
       { accessorKey: 'at_bats', header: '打數' },
       { accessorKey: 'homeruns', header: '全壘打' },
       { accessorKey: 'rbi', header: '打點' },
-      { accessorKey: 'avg', header: '打擊率', cell: ({ row }) => row.avg?.toFixed(3) ?? '.000' },
-      { accessorKey: 'ops', header: '攻擊指數', cell: ({ row }) => row.ops?.toFixed(3) ?? '.000' },
+      {
+        accessorKey: 'avg',
+        header: '打擊率',
+        cell: ({ row }) => row.avg?.toFixed(3) ?? '.000',
+      },
+      {
+        accessorKey: 'ops',
+        header: '攻擊指數',
+        cell: ({ row }) => row.avg?.toFixed(3) ?? '.000',
+      },
     ],
     []
   )
 
   const renderContent = () => {
-    // 僅在初次載入時顯示全螢幕 Loading
     if (isLoading) return <div className={styles.loadingOrErrorState}>Loading...</div>
 
     if (isError) {
@@ -130,28 +189,53 @@ export default function SeasonTrendsPage() {
       )
     }
 
-    // 當有數據時，即使在背景更新 (isFetching) 中也繼續渲染內容
-    if (data) {
+    if (PlayersSeasonData) {
       return (
         <div className={styles.dataDisplayContainer}>
-          {/* 當 isFetching 為 true 時，顯示載入遮罩 */}
           {isFetching && (
             <div className={styles.loadingOverlay}>
               <Loader2 size={32} className={styles.spinner} />
             </div>
           )}
-          <div className={styles.contentContainer}>
-            <StatsTrendChart data={currentPlayerStats} metrics={activeChartMetrics} />
-            <Collapsible.Root>
-              <Collapsible.Trigger asChild>
-                <button className={styles.collapsibleTrigger}>顯示/隱藏 每日詳細數據</button>
-              </Collapsible.Trigger>
-              <Collapsible.Content>
-                <div className={styles.collapsibleContent}>
-                  <DataTable data={currentPlayerStats} columns={tableColumns} />
-                </div>
-              </Collapsible.Content>
-            </Collapsible.Root>
+          <div className={styles.contentGrid}>
+            {/* 根據 Feature Flag 決定是否渲染日曆 */}
+            {FEATURE_FLAGS.enableSeasonTrendsCalendar && (
+              <div className={styles.calendarContainer}>
+                <EventCalendarChart
+                  title={`${selectedPlayer} 出賽日曆`}
+                  subtitle="綠色代表有安打，黃色代表有出賽"
+                  data={calendarData}
+                  initialMonth={startOfMonth(dateRange.start)}
+                  showNavigators={false}
+                  renderTooltip={(dayData) => {
+                    const stats = dayData.payload as PlayerSeasonStatsHistory | undefined
+                    if (!stats) return <div>{dayData.date}</div>
+                    return (
+                      <div>
+                        <div>{dayData.date}</div>
+                        <div>
+                          {stats.hits} H / {stats.at_bats} AB
+                        </div>
+                        {stats.homeruns > 0 && <div>{stats.homeruns} HR</div>}
+                      </div>
+                    )
+                  }}
+                />
+              </div>
+            )}
+            <div className={styles.mainContentContainer}>
+              <StatsTrendChart data={currentPlayerStats} metrics={activeChartMetrics} />
+              <Collapsible.Root>
+                <Collapsible.Trigger asChild>
+                  <button className={styles.collapsibleTrigger}>顯示/隱藏 每日詳細數據</button>
+                </Collapsible.Trigger>
+                <Collapsible.Content>
+                  <div className={styles.collapsibleContent}>
+                    <DataTable data={currentPlayerStats} columns={tableColumns} />
+                  </div>
+                </Collapsible.Content>
+              </Collapsible.Root>
+            </div>
           </div>
         </div>
       )
@@ -168,9 +252,9 @@ export default function SeasonTrendsPage() {
           <select
             value={selectedPlayer}
             onChange={(e) => setSelectedPlayer(e.target.value)}
-            style={{ padding: '8px', borderRadius: '6px' }}
+            className={styles.playerSelect}
           >
-            {TRENDING_PLAYERS.map((player) => (
+            {TARGET_TEAM_PLAYERS.map((player) => (
               <option key={player} value={player}>
                 {player}
               </option>

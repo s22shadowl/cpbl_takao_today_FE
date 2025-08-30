@@ -2,27 +2,58 @@
 
 'use client'
 
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useGetSituationalAtBats } from '@/hooks/analysis/useGetSituationalAtBats'
+import { useGetSeasonGames } from '@/hooks/useGetSeasonGames'
+import {
+  EventCalendarChart,
+  type CalendarDayData,
+} from '@/components/features/charts/EventCalendarChart'
 import type { components } from '@/types/generated-api'
 import * as styles from './SituationalAtBatsTab.css'
 
 type RunnersSituation = components['schemas']['RunnersSituation']
+type SituationalAtBatDetail = components['schemas']['SituationalAtBatDetail']
 
-// 將情境代碼轉換為中文，方便顯示提示訊息
 const situationToText: Record<RunnersSituation, string> = {
   bases_loaded: '滿壘時',
   scoring_position: '得點圈',
-  bases_empty: '壘上無人',
+  bases_empty: '壘上無人時',
 }
-
-// --- 子元件 ---
 
 const PlayerSituationalAtBatsTable: React.FC<{
   playerName: string
   situation: RunnersSituation
 }> = ({ playerName, situation }) => {
   const { data, isLoading, isError, error } = useGetSituationalAtBats(playerName, situation)
+  const { data: seasonGames } = useGetSeasonGames({})
+
+  const calendarData = useMemo((): CalendarDayData[] => {
+    if (!seasonGames || !data) return []
+
+    const gameDaySet = new Set(seasonGames.map((g) => g.game_date))
+    const appearanceMap = new Map<string, SituationalAtBatDetail[]>()
+    data.forEach((atBat) => {
+      if (!appearanceMap.has(atBat.game_date)) {
+        appearanceMap.set(atBat.game_date, [])
+      }
+      appearanceMap.get(atBat.game_date)?.push(atBat)
+    })
+
+    const allDates = Array.from(new Set([...gameDaySet, ...appearanceMap.keys()]))
+
+    return allDates.map((date) => {
+      const atBats = appearanceMap.get(date)
+      const hasHit = atBats?.some((ab) => ab.result_type === 'ON_BASE')
+      return {
+        date,
+        isGameDay: gameDaySet.has(date),
+        hasAppearance: !!atBats,
+        isHighlighted: !!hasHit,
+        payload: atBats,
+      }
+    })
+  }, [seasonGames, data])
 
   if (isLoading) {
     return <p className={styles.infoText}>正在載入 {playerName} 的數據...</p>
@@ -45,37 +76,55 @@ const PlayerSituationalAtBatsTable: React.FC<{
   }
 
   return (
-    <div className={styles.tableContainer}>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th className={styles.tableHeader}>比賽日期</th>
-            <th className={styles.tableHeader}>對戰球隊</th>
-            <th className={styles.tableHeader}>局數</th>
-            <th className={styles.tableHeader}>對戰投手</th>
-            <th className={styles.tableHeader}>結果</th>
-            <th className={styles.tableHeader}>打點</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((atBat) => (
-            <tr key={atBat.id} className={styles.tableRow}>
-              {/* 使用 API 回傳的真實數據 */}
-              <td className={styles.tableCell}>{atBat.game_date}</td>
-              <td className={styles.tableCell}>{atBat.opponent_team}</td>
-              <td className={styles.tableCell}>{atBat.inning}</td>
-              <td className={styles.tableCell}>{atBat.opposing_pitcher_name}</td>
-              <td className={styles.tableCell}>{atBat.result_short}</td>
-              <td className={styles.tableCell}>{atBat.runs_scored_on_play}</td>
+    <>
+      <EventCalendarChart
+        title={`${playerName} ${situationToText[situation]}表現`}
+        data={calendarData}
+        renderTooltip={(dayData) => {
+          const atBats = dayData.payload as SituationalAtBatDetail[] | undefined
+          if (!atBats) return <div>{dayData.date}</div>
+          return (
+            <div>
+              <strong>{dayData.date}</strong>
+              {atBats.map((ab) => (
+                <div key={ab.id}>
+                  {ab.result_short} ({ab.runs_scored_on_play} RBI)
+                </div>
+              ))}
+            </div>
+          )
+        }}
+      />
+
+      <div className={styles.tableContainer}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th className={styles.tableHeader}>比賽日期</th>
+              <th className={styles.tableHeader}>對戰球隊</th>
+              <th className={styles.tableHeader}>局數</th>
+              <th className={styles.tableHeader}>對戰投手</th>
+              <th className={styles.tableHeader}>結果</th>
+              <th className={styles.tableHeader}>打點</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {data.map((atBat) => (
+              <tr key={atBat.id} className={styles.tableRow}>
+                <td className={styles.tableCell}>{atBat.game_date}</td>
+                <td className={styles.tableCell}>{atBat.opponent_team}</td>
+                <td className={styles.tableCell}>{atBat.inning}</td>
+                <td className={styles.tableCell}>{atBat.opposing_pitcher_name}</td>
+                <td className={styles.tableCell}>{atBat.result_short}</td>
+                <td className={styles.tableCell}>{atBat.runs_scored_on_play}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   )
 }
-
-// --- 主元件 ---
 
 interface SituationalAtBatsTabProps {
   players: string[]
