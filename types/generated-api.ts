@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+  '/api/games/season': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * 取得年度賽果
+     * @description 根據年份取得指定球隊的全年度賽果，可用於日曆圖表的底圖。
+     */
+    get: operations['get_season_games_api_games_season_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/games/{game_date}': {
     parameters: {
       query?: never
@@ -421,7 +441,14 @@ export interface components {
      * AtBatResultType
      * @enum {string}
      */
-    AtBatResultType: 'UNSPECIFIED' | 'ON_BASE' | 'OUT' | 'SACRIFICE' | 'FIELDERS_CHOICE' | 'ERROR'
+    AtBatResultType:
+      | 'UNSPECIFIED'
+      | 'ON_BASE'
+      | 'OUT'
+      | 'SACRIFICE'
+      | 'FIELDERS_CHOICE'
+      | 'ERROR'
+      | 'incomplete_pa'
     /** DashboardHasGamesResponse */
     DashboardHasGamesResponse: {
       /**
@@ -531,6 +558,11 @@ export interface components {
        * @description 事件發生的局數
        */
       inning: number
+      /**
+       * Opponent Team
+       * @description 對戰球隊
+       */
+      opponent_team: string
       /** @description 故意四壞的打席紀錄 */
       intentional_walk: components['schemas']['AtBatDetailForStreak']
       /**
@@ -558,6 +590,8 @@ export interface components {
       games_since: number
       /** At Bats Since */
       at_bats_since: number
+      /** @description 球員生涯數據 */
+      career_stats?: components['schemas']['PlayerCareerStats'] | null
     }
     /** NextAtBatResult */
     NextAtBatResult: {
@@ -591,6 +625,11 @@ export interface components {
        */
       streak_length: number
       /**
+       * Opponent Team
+       * @description 對戰球隊
+       */
+      opponent_team: string
+      /**
        * Runs Scored During Streak
        * @description 在這次連線期間得到的總分數
        */
@@ -600,6 +639,87 @@ export interface components {
        * @description 組成此次連線的所有打席詳細紀錄
        */
       at_bats: components['schemas']['AtBatDetailForStreak'][]
+    }
+    /** PlayerCareerStats */
+    PlayerCareerStats: {
+      /** Player Name */
+      player_name: string
+      /** Debut Date */
+      debut_date?: string | null
+      /** Handedness */
+      handedness?: string | null
+      /** Games Played */
+      games_played: number
+      /** Plate Appearances */
+      plate_appearances: number
+      /** At Bats */
+      at_bats: number
+      /** Runs Scored */
+      runs_scored: number
+      /** Hits */
+      hits: number
+      /** Singles */
+      singles: number
+      /** Doubles */
+      doubles: number
+      /** Triples */
+      triples: number
+      /** Homeruns */
+      homeruns: number
+      /** Rbi */
+      rbi: number
+      /** Total Bases */
+      total_bases: number
+      /** Strikeouts */
+      strikeouts: number
+      /** Walks */
+      walks: number
+      /** Intentional Walks */
+      intentional_walks: number
+      /** Hit By Pitch */
+      hit_by_pitch: number
+      /** Stolen Bases */
+      stolen_bases: number
+      /** Caught Stealing */
+      caught_stealing: number
+      /** Sacrifice Hits */
+      sacrifice_hits: number
+      /** Sacrifice Flies */
+      sacrifice_flies: number
+      /** Gidp */
+      gidp: number
+      /** Ground Outs */
+      ground_outs: number
+      /** Fly Outs */
+      fly_outs: number
+      /** Avg */
+      avg?: number | null
+      /** Obp */
+      obp?: number | null
+      /** Slg */
+      slg?: number | null
+      /** Ops */
+      ops?: number | null
+      /** Go Ao Ratio */
+      go_ao_ratio?: number | null
+      /** Sb Percentage */
+      sb_percentage?: number | null
+      /** Ops Plus */
+      ops_plus?: number | null
+      /** K Percentage */
+      k_percentage?: number | null
+      /** Bb Percentage */
+      bb_percentage?: number | null
+      /** Bb Per K */
+      bb_per_k?: number | null
+      /** Babip */
+      babip?: number | null
+      /** Bip Percentage */
+      bip_percentage?: number | null
+      /** Id */
+      id: number
+      /** Updated At */
+      updated_at?: string | null
     }
     /** PlayerGameSummary */
     PlayerGameSummary: {
@@ -752,6 +872,58 @@ export interface components {
       /** Date */
       date?: string | null
     }
+    /** SeasonGame */
+    SeasonGame: {
+      /**
+       * Game Date
+       * Format: date
+       */
+      game_date: string
+      /** Game Id */
+      game_id: number
+      /** Home Team */
+      home_team: string
+      /** Away Team */
+      away_team: string
+    }
+    /**
+     * SituationalAtBatDetail
+     * @description 擴充 AtBatDetail，增加比賽日期與對戰對手資訊。
+     */
+    SituationalAtBatDetail: {
+      /** Id */
+      id: number
+      /** Inning */
+      inning?: number | null
+      /** Sequence In Game */
+      sequence_in_game?: number | null
+      /** Result Short */
+      result_short?: string | null
+      /** Result Description Full */
+      result_description_full?: string | null
+      /** Opposing Pitcher Name */
+      opposing_pitcher_name?: string | null
+      /** Pitch Sequence Details */
+      pitch_sequence_details?: string | null
+      /** Runners On Base Before */
+      runners_on_base_before?: string | null
+      /** Outs Before */
+      outs_before?: number | null
+      /** Runs Scored On Play */
+      runs_scored_on_play: number
+      result_type?: components['schemas']['AtBatResultType'] | null
+      /**
+       * Game Date
+       * Format: date
+       * @description 比賽日期
+       */
+      game_date: string
+      /**
+       * Opponent Team
+       * @description 對戰球隊
+       */
+      opponent_team: string
+    }
     /**
      * StreakDefinition
      * @enum {string}
@@ -775,6 +947,40 @@ export interface components {
 }
 export type $defs = Record<string, never>
 export interface operations {
+  get_season_games_api_games_season_get: {
+    parameters: {
+      query?: {
+        /** @description 查詢的年份，預設為今年。 */
+        year?: number
+        /** @description 是否只回傳已完成的比賽。 */
+        completed_only?: boolean
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['SeasonGame'][]
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
   get_games_by_date_api_games__game_date__get: {
     parameters: {
       query?: {
@@ -898,7 +1104,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['GameResult'][]
+          'application/json': components['schemas']['GameResultWithDetails'][]
         }
       }
       /** @description Validation Error */
@@ -966,7 +1172,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['AtBatDetail'][]
+          'application/json': components['schemas']['SituationalAtBatDetail'][]
         }
       }
       /** @description Validation Error */

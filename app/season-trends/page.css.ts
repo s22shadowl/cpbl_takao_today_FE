@@ -3,9 +3,43 @@
 import { style, keyframes } from '@vanilla-extract/css'
 import { vars } from '@/styles/theme.css'
 
-const spin = keyframes({
-  '0%': { transform: 'rotate(0deg)' },
-  '100%': { transform: 'rotate(360deg)' },
+export const container = style({
+  maxWidth: '1200px',
+  margin: '0 auto',
+  padding: vars.space.lg,
+})
+
+export const header = style({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: vars.space.lg,
+})
+
+export const title = style({
+  fontSize: vars.fontSizes.xxl,
+  fontWeight: 700,
+})
+
+export const controlsContainer = style({
+  display: 'flex',
+  gap: vars.space.md,
+})
+
+export const playerSelect = style({
+  padding: '8px',
+  borderRadius: '6px',
+  border: `1px solid ${vars.colors.border}`,
+  backgroundColor: vars.colors.surface,
+})
+
+export const loadingOrErrorState = style({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  minHeight: '400px',
+  fontSize: vars.fontSizes.lg,
+  color: vars.colors.textSecondary,
 })
 
 export const dataDisplayContainer = style({
@@ -24,83 +58,47 @@ export const loadingOverlay = style({
   alignItems: 'center',
   zIndex: 10,
   borderRadius: '8px',
-  transition: 'opacity 0.2s ease-in-out',
+})
+
+const spin = keyframes({
+  '0%': { transform: 'rotate(0deg)' },
+  '100%': { transform: 'rotate(360deg)' },
 })
 
 export const spinner = style({
   animation: `${spin} 1s linear infinite`,
 })
 
-export const container = style({
-  maxWidth: '1200px',
-  margin: '0 auto',
-  padding: `${vars.space.lg} ${vars.space.md}`,
-  fontFamily: vars.fontFamily.body,
-})
-
-export const header = style({
-  display: 'flex',
-  flexWrap: 'wrap',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  gap: vars.space.md,
-  marginBottom: vars.space.xl,
-  '@media': {
-    'screen and (max-width: 768px)': {
-      flexDirection: 'column',
-      alignItems: 'stretch',
-    },
-  },
-})
-
-export const title = style({
-  fontSize: vars.fontSizes.xxl,
-  fontWeight: 600,
-  color: vars.colors.textPrimary,
-  marginRight: 'auto',
-  '@media': {
-    'screen and (max-width: 768px)': {
-      marginRight: 0,
-      marginBottom: vars.space.md,
-    },
-  },
-})
-
-export const controlsContainer = style({
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: vars.space.md,
-  alignItems: 'center',
-})
-
-export const contentContainer = style({
+export const contentGrid = style({
   display: 'grid',
-  gap: vars.space.xl,
+  gridTemplateColumns: '300px 1fr',
+  gap: vars.space.lg,
+  alignItems: 'flex-start',
 })
 
-export const loadingOrErrorState = style({
+export const calendarContainer = style({
+  position: 'sticky',
+  top: vars.space.lg,
+})
+
+export const mainContentContainer = style({
   display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  minHeight: '400px',
-  fontSize: vars.fontSizes.lg,
-  color: vars.colors.textSecondary,
+  flexDirection: 'column',
+  gap: vars.space.lg,
 })
 
 export const collapsibleTrigger = style({
   width: '100%',
-  padding: `${vars.space.sm} ${vars.space.md}`,
-  backgroundColor: vars.colors.surface,
+  padding: vars.space.sm,
   border: `1px solid ${vars.colors.border}`,
   borderRadius: '6px',
-  textAlign: 'left',
-  fontWeight: 500,
+  backgroundColor: vars.colors.surface,
   cursor: 'pointer',
-  marginTop: vars.space.xl,
-  selectors: {
-    '&:hover': {
-      backgroundColor: vars.colors.background,
-    },
+  textAlign: 'center',
+  marginTop: vars.space.md,
+
+  ':hover': {
+    backgroundColor: vars.colors.background,
   },
 })
 
