@@ -32,6 +32,8 @@ export const th = style({
   textTransform: 'uppercase',
   letterSpacing: '0.5px',
   whiteSpace: 'nowrap',
+  cursor: 'pointer',
+  userSelect: 'none',
 })
 
 export const tbody = style({})
@@ -55,4 +57,11 @@ export const td = style({
   color: vars.colors.textPrimary,
   verticalAlign: 'middle',
   whiteSpace: 'nowrap',
+})
+
+export const sortIcon = style({
+  marginLeft: vars.space.xs,
+  fontSize: '0.8em',
+  display: 'inline-block',
+  width: '1em', // 確保未顯示圖示時也能佔據相同寬度，避免排版跳動
 })
