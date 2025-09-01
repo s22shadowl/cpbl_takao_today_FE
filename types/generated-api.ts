@@ -146,7 +146,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/analysis/positions/{position}': {
+  '/api/analysis/positions/{year}/{position}': {
     parameters: {
       query?: never
       header?: never
@@ -154,10 +154,13 @@ export interface paths {
       cookie?: never
     }
     /**
-     * Get Position Records
-     * @description 查詢指定守備位置的所有球員出賽紀錄。
+     * [T31] 取得指定年度與守備位置的深入分析數據
+     * @description 查詢指定年度與守備位置的深入分析數據，包含：
+     *
+     *     - **calendarData**: 該年度所有比賽日的先發球員與其當日表現。
+     *     - **playerStats**: 所有曾於該位置出賽的球員之賽季累積攻守數據。
      */
-    get: operations['get_position_records_api_analysis_positions__position__get']
+    get: operations['get_position_records_api_analysis_positions__year___position__get']
     put?: never
     post?: never
     delete?: never
@@ -449,6 +452,22 @@ export interface components {
       | 'FIELDERS_CHOICE'
       | 'ERROR'
       | 'incomplete_pa'
+    /** CalendarDataItem */
+    CalendarDataItem: {
+      /**
+       * Date
+       * Format: date
+       */
+      date: string
+      /** Starter Player Name */
+      starter_player_name: string
+      /**
+       * Substitute Player Names
+       * @default []
+       */
+      substitute_player_names: string[]
+      starter_player_summary: components['schemas']['PlayerGameSummary']
+    }
     /** DashboardHasGamesResponse */
     DashboardHasGamesResponse: {
       /**
@@ -721,6 +740,39 @@ export interface components {
       /** Updated At */
       updated_at?: string | null
     }
+    /** PlayerFieldingStats */
+    PlayerFieldingStats: {
+      /** Id */
+      id: number
+      /** Player Name */
+      player_name: string
+      /** Team Name */
+      team_name?: string | null
+      /** Position */
+      position?: string | null
+      /** Games Played */
+      games_played: number
+      /** Total Chances */
+      total_chances: number
+      /** Putouts */
+      putouts: number
+      /** Assists */
+      assists: number
+      /** Errors */
+      errors: number
+      /** Double Plays */
+      double_plays: number
+      /** Triple Plays */
+      triple_plays: number
+      /** Passed Balls */
+      passed_balls: number
+      /** Caught Stealing Catcher */
+      caught_stealing_catcher: number
+      /** Stolen Bases Allowed Catcher */
+      stolen_bases_allowed_catcher: number
+      /** Fielding Percentage */
+      fielding_percentage?: number | null
+    }
     /** PlayerGameSummary */
     PlayerGameSummary: {
       /** Id */
@@ -785,6 +837,77 @@ export interface components {
        * @default []
        */
       at_bat_details: components['schemas']['AtBatDetail'][]
+    }
+    /** PlayerSeasonStats */
+    PlayerSeasonStats: {
+      /** Player Name */
+      player_name: string
+      /** Team Name */
+      team_name?: string | null
+      /** Data Retrieved Date */
+      data_retrieved_date?: string | null
+      /** Games Played */
+      games_played: number
+      /** Plate Appearances */
+      plate_appearances: number
+      /** At Bats */
+      at_bats: number
+      /** Runs Scored */
+      runs_scored: number
+      /** Hits */
+      hits: number
+      /** Rbi */
+      rbi: number
+      /** Homeruns */
+      homeruns: number
+      /** Singles */
+      singles: number
+      /** Doubles */
+      doubles: number
+      /** Triples */
+      triples: number
+      /** Total Bases */
+      total_bases: number
+      /** Strikeouts */
+      strikeouts: number
+      /** Stolen Bases */
+      stolen_bases: number
+      /** Gidp */
+      gidp: number
+      /** Sacrifice Hits */
+      sacrifice_hits: number
+      /** Sacrifice Flies */
+      sacrifice_flies: number
+      /** Walks */
+      walks: number
+      /** Intentional Walks */
+      intentional_walks: number
+      /** Hit By Pitch */
+      hit_by_pitch: number
+      /** Caught Stealing */
+      caught_stealing: number
+      /** Ground Outs */
+      ground_outs: number
+      /** Fly Outs */
+      fly_outs: number
+      /** Avg */
+      avg?: number | null
+      /** Obp */
+      obp?: number | null
+      /** Slg */
+      slg?: number | null
+      /** Ops */
+      ops?: number | null
+      /** Go Ao Ratio */
+      go_ao_ratio?: number | null
+      /** Sb Percentage */
+      sb_percentage?: number | null
+      /** Silver Slugger Index */
+      silver_slugger_index?: number | null
+      /** Id */
+      id: number
+      /** Updated At */
+      updated_at?: string | null
     }
     /** PlayerSeasonStatsHistory */
     PlayerSeasonStatsHistory: {
@@ -859,6 +982,24 @@ export interface components {
        * Format: date-time
        */
       created_at: string
+    }
+    /** PlayerStatsForPositionAnalysis */
+    PlayerStatsForPositionAnalysis: {
+      /** Player Name */
+      player_name: string
+      batting_stats?: components['schemas']['PlayerSeasonStats'] | null
+      /**
+       * Fielding Stats
+       * @default []
+       */
+      fielding_stats: components['schemas']['PlayerFieldingStats'][]
+    }
+    /** PositionAnalysisResponse */
+    PositionAnalysisResponse: {
+      /** Calendar Data */
+      calendar_data: components['schemas']['CalendarDataItem'][]
+      /** Player Stats */
+      player_stats: components['schemas']['PlayerStatsForPositionAnalysis'][]
     }
     /**
      * RunnersSituation
@@ -952,8 +1093,8 @@ export interface operations {
       query?: {
         /** @description 查詢的年份，預設為今年。 */
         year?: number
-        /** @description 是否只回傳已完成的比賽。 */
-        completed_only?: boolean
+        /** @description 是否只回傳已完成的比賽。接受 true/false, 1/0, t/f 等常見布林值表示法。 */
+        completed_only?: string
       }
       header?: never
       path?: never
@@ -1186,16 +1327,14 @@ export interface operations {
       }
     }
   }
-  get_position_records_api_analysis_positions__position__get: {
+  get_position_records_api_analysis_positions__year___position__get: {
     parameters: {
-      query?: {
-        /** @description 要跳過的紀錄數量 */
-        skip?: number
-        /** @description 每頁回傳的最大紀錄數量 */
-        limit?: number
-      }
+      query?: never
       header?: never
       path: {
+        /** @description 查詢的年份 */
+        year: number
+        /** @description 查詢的守備位置 (例如: 2B, SS) */
         position: string
       }
       cookie?: never
@@ -1208,7 +1347,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['PlayerGameSummary'][]
+          'application/json': components['schemas']['PositionAnalysisResponse']
         }
       }
       /** @description Validation Error */
