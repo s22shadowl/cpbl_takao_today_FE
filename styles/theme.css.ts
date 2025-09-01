@@ -43,6 +43,12 @@ export const vars = createThemeContract({
     xl: null,
     xxl: null,
   },
+  zIndices: {
+    backdrop: null,
+    dropdown: null,
+    navbar: null,
+    modal: null,
+  },
 })
 
 // =================================================================
@@ -84,6 +90,12 @@ export const lightTheme = createTheme(vars, {
     xl: '20px',
     xxl: '24px',
   },
+  zIndices: {
+    backdrop: '900',
+    dropdown: '950',
+    navbar: '1000',
+    modal: '1100',
+  },
 })
 
 // =================================================================
@@ -124,5 +136,11 @@ export const darkTheme = createTheme(vars, {
     lg: '18px',
     xl: '20px',
     xxl: '24px',
+  },
+  zIndices: {
+    backdrop: '900',
+    dropdown: '950',
+    navbar: '1000',
+    modal: '1100',
   },
 })
