@@ -1,4 +1,4 @@
-// app/advanced-analysis/page.tsx
+// /app/advanced-analysis/page.tsx
 
 'use client'
 
@@ -9,12 +9,14 @@ import { SituationalAtBatsTab } from '@/components/features/advanced-analysis/Si
 import { IbbImpactTab } from '@/components/features/advanced-analysis/IbbImpactTab'
 import { NPBStreaksTab } from '@/components/features/advanced-analysis/NPBStreaksTab'
 import { RaccoonTrioTab } from '@/components/features/advanced-analysis/RaccoonTrioTab'
+import { PositionInfieldTab } from '@/components/features/advanced-analysis/PositionInfieldTab' // 匯入新元件
 import { situational_at_bats_tab_players, scoring_position_tab_players } from '@/lib/constants'
 import * as styles from './page.css'
 
 // 頁籤設定資料
 const analysisTabs = [
   { value: 'homerun-tracking', title: '百轟倒數' },
+  { value: 'position-infield', title: '二壘大風吹' }, // 加入新分頁
   { value: 'bases-loaded', title: '滿壘大王' },
   { value: 'scoring-position', title: '得點圈之鬼' },
   { value: 'ibb-impact', title: 'IBB大哥' },
@@ -42,6 +44,11 @@ const AdvancedAnalysisPage = () => {
         {/* 全壘打追蹤頁籤 */}
         <TabsContent value="homerun-tracking">
           <HomerunTrackingTab />
+        </TabsContent>
+
+        {/* 二壘大風吹頁籤 */}
+        <TabsContent value="position-infield">
+          <PositionInfieldTab />
         </TabsContent>
 
         {/* 滿壘大王頁籤 */}
