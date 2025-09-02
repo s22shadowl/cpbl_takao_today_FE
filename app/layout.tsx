@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import QueryProvider from '@/components/providers/QueryProvider'
+import { SpeedInsights } from '@vercel/speed-insights/next' // 1. 匯入 SpeedInsights
 import { Navbar } from '@/components/ui/Navbar'
 import { Footer } from '@/components/ui/Footer'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
@@ -31,6 +32,7 @@ export default function RootLayout({
             <Footer />
           </footer>
         </ThemeProvider>
+        <SpeedInsights />
       </body>
     </html>
   )

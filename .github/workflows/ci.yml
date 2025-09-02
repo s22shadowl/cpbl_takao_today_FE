@@ -1,0 +1,51 @@
+# .github/workflows/ci.yml
+
+# Workflow 名稱
+name: CI
+
+# 觸發條件：當有 pull_request 推送到 main 分支時觸發
+on:
+  pull_request:
+    branches: [main]
+
+# Job 設定
+jobs:
+  build-and-test:
+    # Job 名稱
+    name: Build and Test
+    # 運行環境
+    runs-on: ubuntu-latest
+
+    # 執行步驟
+    steps:
+      # Step 1: Checkout Code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      # Step 3: Install Dependencies
+      - name: Install Dependencies
+        run: npm ci
+
+      # Step 4: Run Lint
+      - name: Run Lint
+        run: npm run lint
+
+      # Step 5: Run TypeScript Check (Next.js build includes this)
+      - name: Run TypeScript Check
+        run: npm run build
+
+      # Step 6: Run Unit & Component Tests
+      - name: Run Unit & Component Tests
+        run: npm run test
+
+      # Step 7: Run E2E Tests
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: Run E2E Tests
+        run: npx playwright test

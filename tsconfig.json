@@ -1,29 +1,40 @@
 {
   "compilerOptions": {
+    // 類型檢查設定
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
-    "baseUrl": ".",
     "skipLibCheck": true,
     "strict": true,
+    "forceConsistentCasingInFileNames": true,
     "noEmit": true,
+
+    // 模組解析設定
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+
+    // JSX 設定
     "jsx": "preserve",
-    "incremental": true,
+
+    // 路徑別名設定
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
+
+    // 插件與其他設定
     "plugins": [
       {
         "name": "next"
       }
     ],
-    "paths": {
-      "@/*": ["./*"]
-    },
+    "incremental": true,
     "types": ["node", "vitest/globals"]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }
+
