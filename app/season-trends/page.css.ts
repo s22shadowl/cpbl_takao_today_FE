@@ -7,6 +7,7 @@ export const container = style({
   maxWidth: '1200px',
   margin: '0 auto',
   padding: vars.space.lg,
+  paddingTop: `calc(60px + ${vars.space.lg})`, // 為 fixed Navbar 增加頂部間距
 })
 
 export const header = style({
@@ -14,6 +15,8 @@ export const header = style({
   justifyContent: 'space-between',
   alignItems: 'center',
   marginBottom: vars.space.lg,
+  flexWrap: 'wrap',
+  gap: vars.space.md,
 })
 
 export const title = style({
@@ -23,6 +26,7 @@ export const title = style({
 
 export const controlsContainer = style({
   display: 'flex',
+  alignItems: 'center',
   gap: vars.space.md,
 })
 
@@ -69,19 +73,37 @@ export const spinner = style({
   animation: `${spin} 1s linear infinite`,
 })
 
+// 使用 Flexbox 替代 Grid 以解決跑版問題
 export const contentGrid = style({
-  display: 'grid',
-  gridTemplateColumns: '300px 1fr',
+  display: 'flex',
+  flexDirection: 'row',
   gap: vars.space.lg,
   alignItems: 'flex-start',
+  '@media': {
+    'screen and (max-width: 1024px)': {
+      flexDirection: 'column',
+    },
+  },
 })
 
+// 保留 sticky 定位，並設定固定寬度
 export const calendarContainer = style({
+  flex: '0 0 300px', // 設定固定寬度且不縮放
   position: 'sticky',
-  top: vars.space.lg,
+  top: `calc(60px + ${vars.space.lg})`, // sticky 的 top 值也要加上 Navbar 高度
+  '@media': {
+    'screen and (max-width: 1024px)': {
+      flex: '1 1 100%',
+      width: '100%',
+      position: 'static', // 在移動端取消 sticky
+    },
+  },
 })
 
+// 設定為可伸縮以填滿剩餘空間
 export const mainContentContainer = style({
+  flex: '1 1 0',
+  minWidth: 0, // 防止內容溢出
   display: 'flex',
   flexDirection: 'column',
   gap: vars.space.lg,
@@ -96,7 +118,6 @@ export const collapsibleTrigger = style({
   cursor: 'pointer',
   textAlign: 'center',
   marginTop: vars.space.md,
-
   ':hover': {
     backgroundColor: vars.colors.background,
   },

@@ -6,6 +6,8 @@ import * as React from 'react'
 import { addDays, startOfMonth } from 'date-fns'
 import { Check, Loader2 } from 'lucide-react'
 import * as Collapsible from '@radix-ui/react-collapsible'
+import { DateRange } from 'react-day-picker'
+import { type ColumnDef } from '@tanstack/react-table'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,20 +21,18 @@ import { useGetPlayersSeasonStats } from '@/hooks/useGetPlayersSeasonStats'
 import { useGetSeasonGames } from '@/hooks/useGetSeasonGames'
 import { TARGET_TEAM_PLAYERS } from '@/lib/constants'
 import { PLAYER_STATS_METRICS } from '@/lib/configs/metrics'
-import { FEATURE_FLAGS } from '@/lib/configs/featureFlags' // 引入 Feature Flag
+import { FEATURE_FLAGS } from '@/lib/configs/featureFlags'
 import { DateRangePicker } from '@/components/features/DateRangePicker'
 import { StatsTrendChart } from '@/components/features/StatsTrendChart'
 import {
   EventCalendarChart,
   type CalendarDayData,
 } from '@/components/features/charts/EventCalendarChart'
-import { DataTable, ColumnDef } from '@/components/ui/DataTable'
+import { DataTable } from '@/components/ui/DataTable'
 import * as styles from './page.css'
 import type { components } from '@/types/generated-api'
 
 type PlayerSeasonStatsHistory = components['schemas']['PlayerSeasonStatsHistory']
-
-// TODO: EventCalendarChart 業務邏輯問題，待調整，先關掉，CSS待調整
 
 // --- UI 控制器元件 ---
 const MetricSelector = ({
@@ -84,14 +84,23 @@ const MetricSelector = ({
 
 // --- 主頁面元件 ---
 export default function SeasonTrendsPage() {
-  const [dateRange, setDateRange] = React.useState<{ start: Date; end: Date }>(() => {
+  const [dateRange, setDateRange] = React.useState<DateRange | undefined>(() => {
     const end = new Date()
     const start = addDays(end, -29)
-    return { start, end }
+    return { from: start, to: end }
   })
 
   const [selectedPlayer, setSelectedPlayer] = React.useState<string>(TARGET_TEAM_PLAYERS[0])
   const [selectedMetrics, setSelectedMetrics] = React.useState<string[]>(['avg', 'ops'])
+
+  const apiDateRange = React.useMemo(() => {
+    if (!dateRange?.from || !dateRange?.to) {
+      const end = new Date()
+      const start = addDays(end, -29)
+      return { start, end }
+    }
+    return { start: dateRange.from, end: dateRange.to }
+  }, [dateRange])
 
   const {
     data: PlayersSeasonData,
@@ -101,12 +110,11 @@ export default function SeasonTrendsPage() {
     error,
   } = useGetPlayersSeasonStats({
     playerNames: TARGET_TEAM_PLAYERS,
-    dateRange,
+    dateRange: apiDateRange,
   })
 
-  // 根據 Feature Flag 決定是否觸發此 Hook
   const { data: seasonGames } = useGetSeasonGames({
-    year: dateRange.start.getFullYear(),
+    year: apiDateRange.start.getFullYear(),
     enabled: FEATURE_FLAGS.enableSeasonTrendsCalendar,
   })
 
@@ -120,7 +128,6 @@ export default function SeasonTrendsPage() {
     )
   }, [PlayersSeasonData, selectedPlayer])
 
-  // 僅在 Feature Flag 啟用時才計算日曆資料
   const calendarData = React.useMemo((): CalendarDayData[] => {
     if (
       !FEATURE_FLAGS.enableSeasonTrendsCalendar ||
@@ -145,8 +152,8 @@ export default function SeasonTrendsPage() {
       return {
         date: game.game_date,
         isGameDay: true,
-        hasAppearance: !!playerStat && playerStat.at_bats > 0,
-        isHighlighted: !!playerStat && playerStat.hits > 0,
+        hasAppearance: !!playerStat && (playerStat.at_bats ?? 0) > 0,
+        isHighlighted: !!playerStat && (playerStat.hits ?? 0) > 0,
         payload: playerStat,
       }
     })
@@ -167,12 +174,18 @@ export default function SeasonTrendsPage() {
       {
         accessorKey: 'avg',
         header: '打擊率',
-        cell: ({ row }) => row.avg?.toFixed(3) ?? '.000',
+        cell: ({ row }) => {
+          const avg = row.original.avg
+          return typeof avg === 'number' ? avg.toFixed(3) : '.000'
+        },
       },
       {
         accessorKey: 'ops',
         header: '攻擊指數',
-        cell: ({ row }) => row.avg?.toFixed(3) ?? '.000',
+        cell: ({ row }) => {
+          const ops = row.original.ops
+          return typeof ops === 'number' ? ops.toFixed(3) : '.000'
+        },
       },
     ],
     []
@@ -198,14 +211,13 @@ export default function SeasonTrendsPage() {
             </div>
           )}
           <div className={styles.contentGrid}>
-            {/* 根據 Feature Flag 決定是否渲染日曆 */}
             {FEATURE_FLAGS.enableSeasonTrendsCalendar && (
               <div className={styles.calendarContainer}>
                 <EventCalendarChart
                   title={`${selectedPlayer} 出賽日曆`}
                   subtitle="綠色代表有安打，黃色代表有出賽"
                   data={calendarData}
-                  initialMonth={startOfMonth(dateRange.start)}
+                  initialMonth={startOfMonth(apiDateRange.start)}
                   showNavigators={false}
                   renderTooltip={(dayData) => {
                     const stats = dayData.payload as PlayerSeasonStatsHistory | undefined
@@ -214,9 +226,9 @@ export default function SeasonTrendsPage() {
                       <div>
                         <div>{dayData.date}</div>
                         <div>
-                          {stats.hits} H / {stats.at_bats} AB
+                          {stats.hits ?? 0} H / {stats.at_bats ?? 0} AB
                         </div>
-                        {stats.homeruns > 0 && <div>{stats.homeruns} HR</div>}
+                        {(stats.homeruns ?? 0) > 0 && <div>{stats.homeruns} HR</div>}
                       </div>
                     )
                   }}
@@ -264,7 +276,7 @@ export default function SeasonTrendsPage() {
             selectedMetrics={selectedMetrics}
             onSelectionChange={setSelectedMetrics}
           />
-          <DateRangePicker onRangeChange={setDateRange} />
+          <DateRangePicker value={dateRange} onChange={setDateRange} />
         </div>
       </header>
       <main>{renderContent()}</main>
