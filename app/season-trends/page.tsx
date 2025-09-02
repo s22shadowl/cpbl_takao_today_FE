@@ -206,7 +206,7 @@ export default function SeasonTrendsPage() {
       return (
         <div className={styles.dataDisplayContainer}>
           {isFetching && (
-            <div className={styles.loadingOverlay}>
+            <div className={styles.loadingOverlay} data-testid="loading-spinner">
               <Loader2 size={32} className={styles.spinner} />
             </div>
           )}
