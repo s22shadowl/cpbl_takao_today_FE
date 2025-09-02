@@ -45,7 +45,8 @@ jobs:
         run: npm run test
 
       # Step 7: Run E2E Tests
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-      - name: Run E2E Tests
-        run: npx playwright test
+      # 後端上線先關閉 CI 中的 E2E
+      # - name: Install Playwright Browsers
+      #   run: npx playwright install --with-deps
+      # - name: Run E2E Tests
+      #   run: npx playwright test
