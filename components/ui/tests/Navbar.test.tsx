@@ -14,9 +14,19 @@ vi.mock('next/link', () => ({
   }: {
     href: string
     children: React.ReactNode
-    onClick?: () => void
+    onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void
   }) => (
-    <a href={href} onClick={onClick}>
+    <a
+      href={href}
+      onClick={(e) => {
+        // 阻止 jsdom 嘗試進行頁面導航
+        e.preventDefault()
+        // 如果原始的 onClick 存在，則呼叫它 (例如 Navbar 中的 closeMenu)
+        if (onClick) {
+          onClick(e)
+        }
+      }}
+    >
       {children}
     </a>
   ),
@@ -56,9 +66,9 @@ describe('Navbar', () => {
     expect(menuButton).toHaveAttribute('aria-expanded', 'true')
 
     // --- Click a link ---
-    // Find a link inside the menu, e.g., 'About'
-    const aboutLink = screen.getByRole('link', { name: /賽季趨勢/i })
-    await user.click(aboutLink)
+    // Find a link inside the menu, e.g., '賽季趨勢'
+    const seasonTrendLink = screen.getByRole('link', { name: /賽季趨勢/i })
+    await user.click(seasonTrendLink)
 
     // The menu should now be closed
     expect(menuButton).toHaveAttribute('aria-expanded', 'false')

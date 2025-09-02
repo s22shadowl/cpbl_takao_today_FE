@@ -47,4 +47,6 @@ storybook-static/
 
 /.vscode/
 
+# e2e
 /test-results/
+/coverage/

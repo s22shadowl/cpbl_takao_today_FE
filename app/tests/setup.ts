@@ -14,3 +14,8 @@ afterEach(() => {
   // 重置所有 mock 的呼叫紀錄，確保測試案例之間的獨立性
   vi.clearAllMocks()
 })
+
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(),
+  usePathname: vi.fn(),
+}))

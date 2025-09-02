@@ -22,6 +22,22 @@ export default defineConfig({
     vanillaExtractPlugin(),
   ],
   test: {
+    // 將 coverage 設定移至此處，使其成為全域設定
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      include: ['hooks/**/*', 'lib/**/*', 'components/**/*'],
+      exclude: [
+        'components/providers/**/*',
+        'components/**/*.stories.tsx',
+        'components/**/*.css.ts',
+        '**/*.test.ts',
+        '**/*.test.tsx',
+        'lib/constants.ts',
+        'lib/configs/**/*',
+      ],
+      all: true,
+    },
     projects: [
       // 專案一：Storybook 整合測試，暫時關閉
       // {
