@@ -24,15 +24,12 @@ export const Navbar = () => {
     setIsOpen(false)
   }
 
-  // Effect to handle body scroll lock when menu is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = 'auto'
     }
-
-    // Cleanup function to restore scroll on component unmount
     return () => {
       document.body.style.overflow = 'auto'
     }
@@ -41,7 +38,8 @@ export const Navbar = () => {
   return (
     <header>
       <div
-        className={styles.backdrop[isOpen ? 'open' : 'closed']}
+        className={styles.backdrop}
+        data-state={isOpen ? 'open' : 'closed'}
         onClick={closeMenu}
         aria-hidden="true"
       />
@@ -57,7 +55,7 @@ export const Navbar = () => {
         >
           {isOpen ? <X /> : <Menu />}
         </button>
-        <div className={styles.dropdownMenu[isOpen ? 'open' : 'closed']}>
+        <div className={styles.dropdownMenu} data-state={isOpen ? 'open' : 'closed'}>
           <ul className={styles.menuList}>
             {navLinks.map((link) => (
               <li key={link.href}>
