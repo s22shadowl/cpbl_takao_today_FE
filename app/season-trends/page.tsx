@@ -29,6 +29,7 @@ import {
   type CalendarDayData,
 } from '@/components/features/charts/EventCalendarChart'
 import { DataTable } from '@/components/ui/DataTable'
+import { Card } from '@/components/ui/Card' // 1. 匯入 Card 元件
 import * as styles from './page.css'
 import type { components } from '@/types/generated-api'
 
@@ -204,52 +205,55 @@ export default function SeasonTrendsPage() {
 
     if (PlayersSeasonData) {
       return (
-        <div className={styles.dataDisplayContainer}>
-          {isFetching && (
-            <div className={styles.loadingOverlay} data-testid="loading-spinner">
-              <Loader2 size={32} className={styles.spinner} />
-            </div>
-          )}
-          <div className={styles.contentGrid}>
-            {FEATURE_FLAGS.enableSeasonTrendsCalendar && (
-              <div className={styles.calendarContainer}>
-                <EventCalendarChart
-                  title={`${selectedPlayer} 出賽日曆`}
-                  subtitle="綠色代表有安打，黃色代表有出賽"
-                  data={calendarData}
-                  initialMonth={startOfMonth(apiDateRange.start)}
-                  showNavigators={false}
-                  renderTooltip={(dayData) => {
-                    const stats = dayData.payload as PlayerSeasonStatsHistory | undefined
-                    if (!stats) return <div>{dayData.date}</div>
-                    return (
-                      <div>
-                        <div>{dayData.date}</div>
-                        <div>
-                          {stats.hits ?? 0} H / {stats.at_bats ?? 0} AB
-                        </div>
-                        {(stats.homeruns ?? 0) > 0 && <div>{stats.homeruns} HR</div>}
-                      </div>
-                    )
-                  }}
-                />
+        // 2. 將 Card 元件包裹在資料顯示容器外層
+        <Card>
+          <div className={styles.dataDisplayContainer}>
+            {isFetching && (
+              <div className={styles.loadingOverlay} data-testid="loading-spinner">
+                <Loader2 size={32} className={styles.spinner} />
               </div>
             )}
-            <div className={styles.mainContentContainer}>
-              <StatsTrendChart data={currentPlayerStats} metrics={activeChartMetrics} />
-              <Collapsible.Root>
-                <Collapsible.Trigger asChild>
-                  <button className={styles.collapsibleTrigger}>顯示/隱藏 每日詳細數據</button>
-                </Collapsible.Trigger>
-                <Collapsible.Content>
-                  <div className={styles.collapsibleContent}>
-                    <DataTable data={currentPlayerStats} columns={tableColumns} />
-                  </div>
-                </Collapsible.Content>
-              </Collapsible.Root>
+            <div className={styles.contentGrid}>
+              {FEATURE_FLAGS.enableSeasonTrendsCalendar && (
+                <div className={styles.calendarContainer}>
+                  <EventCalendarChart
+                    title={`${selectedPlayer} 出賽日曆`}
+                    subtitle="綠色代表有安打，黃色代表有出賽"
+                    data={calendarData}
+                    initialMonth={startOfMonth(apiDateRange.start)}
+                    showNavigators={false}
+                    renderTooltip={(dayData) => {
+                      const stats = dayData.payload as PlayerSeasonStatsHistory | undefined
+                      if (!stats) return <div>{dayData.date}</div>
+                      return (
+                        <div>
+                          <div>{dayData.date}</div>
+                          <div>
+                            {stats.hits ?? 0} H / {stats.at_bats ?? 0} AB
+                          </div>
+                          {(stats.homeruns ?? 0) > 0 && <div>{stats.homeruns} HR</div>}
+                        </div>
+                      )
+                    }}
+                  />
+                </div>
+              )}
+              <div className={styles.mainContentContainer}>
+                <StatsTrendChart data={currentPlayerStats} metrics={activeChartMetrics} />
+                <Collapsible.Root>
+                  <Collapsible.Trigger asChild>
+                    <button className={styles.collapsibleTrigger}>顯示/隱藏 每日詳細數據</button>
+                  </Collapsible.Trigger>
+                  <Collapsible.Content>
+                    <div className={styles.collapsibleContent}>
+                      <DataTable data={currentPlayerStats} columns={tableColumns} />
+                    </div>
+                  </Collapsible.Content>
+                </Collapsible.Root>
+              </div>
             </div>
           </div>
-        </div>
+        </Card>
       )
     }
 
@@ -279,7 +283,7 @@ export default function SeasonTrendsPage() {
           <DateRangePicker value={dateRange} onChange={setDateRange} />
         </div>
       </header>
-      <main>{renderContent()}</main>
+      {renderContent()}
     </div>
   )
 }
