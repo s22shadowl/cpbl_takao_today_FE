@@ -11,7 +11,7 @@ import { NPBStreaksTab } from '@/components/features/advanced-analysis/NPBStreak
 import { RaccoonTrioTab } from '@/components/features/advanced-analysis/RaccoonTrioTab'
 import { PositionInfieldTab } from '@/components/features/advanced-analysis/PositionInfieldTab'
 import { situational_at_bats_tab_players, scoring_position_tab_players } from '@/lib/constants'
-import { Card } from '@/components/ui/Card' // 1. 匯入 Card 元件
+import { Card } from '@/components/ui/Card' // 匯入 Card
 import * as styles from './page.css'
 
 // 頁籤設定資料
@@ -30,11 +30,9 @@ const analysisTabs = [
  */
 const AdvancedAnalysisPage = () => {
   return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>進階數據分析</h1>
-
-      {/* 2. 將 Card 元件包裹在 Tabs 元件外層 */}
+    <main className={styles.container}>
       <Card>
+        <h1 className={styles.title}>進階數據分析</h1>
         <Tabs defaultValue={analysisTabs[0].value}>
           <TabsList>
             {analysisTabs.map((tab) => (
@@ -86,7 +84,7 @@ const AdvancedAnalysisPage = () => {
           </TabsContent>
         </Tabs>
       </Card>
-    </div>
+    </main>
   )
 }
 

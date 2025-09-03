@@ -1,12 +1,14 @@
 // app/page.css.ts
 
 import { style } from '@vanilla-extract/css'
+import { vars } from '@/styles/theme.css'
 
 export const section = style({
-  // Equivalent to space-y-8, applied to each Card
-  selectors: {
-    '&:not(:last-child)': {
-      marginBottom: '2rem',
-    },
-  },
+  marginBottom: vars.space.xl, // 修改：統一所有卡片的下間距 (32px)
+})
+
+export const pageTitle = style({
+  fontSize: vars.fontSizes.xxl,
+  fontWeight: 'bold',
+  marginBottom: vars.space.lg,
 })

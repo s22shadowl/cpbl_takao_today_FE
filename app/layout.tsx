@@ -1,7 +1,9 @@
 // app/layout.tsx
+
 import type { Metadata } from 'next'
+import 'normalize.css/normalize.css'
 import { Inter } from 'next/font/google'
-import './globals.css'
+import '@/styles/global.css'
 import QueryProvider from '@/components/providers/QueryProvider'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Navbar } from '@/components/ui/Navbar'
