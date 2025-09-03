@@ -3,10 +3,11 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import QueryProvider from '@/components/providers/QueryProvider'
-import { SpeedInsights } from '@vercel/speed-insights/next' // 1. 匯入 SpeedInsights
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Navbar } from '@/components/ui/Navbar'
 import { Footer } from '@/components/ui/Footer'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
+import * as styles from './layout.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -27,7 +28,9 @@ export default function RootLayout({
           <header>
             <Navbar />
           </header>
-          <QueryProvider>{children}</QueryProvider>
+          <main className={styles.mainContainer}>
+            <QueryProvider>{children}</QueryProvider>
+          </main>
           <footer>
             <Footer />
           </footer>
