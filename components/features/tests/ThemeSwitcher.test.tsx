@@ -22,20 +22,26 @@ describe('ThemeSwitcher', () => {
     useThemeSpy.mockRestore()
   })
 
-  it('should display the correct text for switching to dark mode', () => {
+  it('should display the correct aria-label for switching to dark mode', () => {
     const toggleThemeMock = vi.fn()
     useThemeSpy = mockUseTheme('light', toggleThemeMock)
 
     render(<ThemeSwitcher />)
-    expect(screen.getByRole('button')).toHaveTextContent('切換至 深色 模式')
+    expect(screen.getByRole('button')).toHaveAttribute(
+      'aria-label',
+      '切換至 深色 模式',
+    )
   })
 
-  it('should display the correct text for switching to light mode', () => {
+  it('should display the correct aria-label for switching to light mode', () => {
     const toggleThemeMock = vi.fn()
     useThemeSpy = mockUseTheme('dark', toggleThemeMock)
 
     render(<ThemeSwitcher />)
-    expect(screen.getByRole('button')).toHaveTextContent('切換至 淺色 模式')
+    expect(screen.getByRole('button')).toHaveAttribute(
+      'aria-label',
+      '切換至 淺色 模式',
+    )
   })
 
   it('should call toggleTheme when the button is clicked', async () => {

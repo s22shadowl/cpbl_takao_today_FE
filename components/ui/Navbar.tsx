@@ -1,11 +1,10 @@
-// /components/ui/Navbar.tsx
-
 'use client'
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Menu, X } from '@/components/ui/Icons'
 import * as styles from './Navbar.css'
+import { ThemeSwitcher } from '../features/ThemeSwitcher'
 
 const navLinks = [
   { href: '/season-trends', label: '賽季趨勢' },
@@ -44,27 +43,32 @@ export const Navbar = () => {
         aria-hidden="true"
       />
       <nav className={styles.navContainer}>
-        <Link href="/" className={styles.titleLink} onClick={closeMenu}>
-          CPBL Stats
-        </Link>
-        <button
-          className={styles.menuButton}
-          onClick={toggleMenu}
-          aria-expanded={isOpen}
-          aria-label="Toggle navigation menu"
-        >
-          {isOpen ? <X /> : <Menu />}
-        </button>
-        <div className={styles.dropdownMenu} data-state={isOpen ? 'open' : 'closed'}>
-          <ul className={styles.menuList}>
-            {navLinks.map((link) => (
-              <li key={link.href}>
-                <Link href={link.href} className={styles.menuLink} onClick={closeMenu}>
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+        <div className={styles.navTextBlock}>
+          <div className={styles.titleBlock}>
+            <ThemeSwitcher />
+            <Link href="/" className={styles.titleLink} onClick={closeMenu}>
+              今日台鋼
+            </Link>
+          </div>
+          <button
+            className={styles.menuButton}
+            onClick={toggleMenu}
+            aria-expanded={isOpen}
+            aria-label="Toggle navigation menu"
+          >
+            {isOpen ? <X /> : <Menu />}
+          </button>
+          <div className={styles.dropdownMenu} data-state={isOpen ? 'open' : 'closed'}>
+            <ul className={styles.menuList}>
+              {navLinks.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className={styles.menuLink} onClick={closeMenu}>
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </nav>
     </header>

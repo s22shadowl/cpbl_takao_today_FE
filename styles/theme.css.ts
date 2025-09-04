@@ -19,6 +19,7 @@ export const vars = createThemeContract({
     surface: null,
     textPrimary: null,
     textSecondary: null,
+    textNav: null,
     border: null,
     success: null,
     error: null,
@@ -66,6 +67,7 @@ export const lightTheme = createTheme(vars, {
     surface: '#FFFFFF',
     textPrimary: '#1A202C',
     textSecondary: '#718096',
+    textNav: '#FFFFFF',
     border: '#E2E8F0',
     success: '#38A169',
     error: '#E53E3E',
@@ -109,6 +111,7 @@ export const darkTheme = createTheme(vars, {
     surface: '#1E1E1E', // 卡片顏色
     textPrimary: '#E0E0E0', // 稍微降低文字亮度，使其更柔和
     textSecondary: '#A0AEC0',
+    textNav: '#FFFFFF',
     border: '#333333', // 使用更深、更中性的灰色作為邊框
     success: '#68D391',
     error: '#FC8181',

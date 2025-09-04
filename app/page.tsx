@@ -8,18 +8,16 @@ import * as styles from './page.css'
 export default function HomePage() {
   return (
     <div>
-      <Card>
-        <h1 className={styles.pageTitle}>數據總覽</h1>
+      <h1 className={styles.pageTitle}>數據總覽</h1>
 
-        <Card className={styles.section}>
-          <h2>本日戰報</h2>
-          <Scoreboard />
-        </Card>
+      <Card className={styles.section}>
+        <h2>本日戰報</h2>
+        <Scoreboard />
+      </Card>
 
-        <Card className={styles.section}>
-          <h2>本日焦點球員</h2>
-          <PlayerDailyPerformance />
-        </Card>
+      <Card className={styles.section}>
+        <h2>本日焦點球員</h2>
+        <PlayerDailyPerformance />
       </Card>
     </div>
   )

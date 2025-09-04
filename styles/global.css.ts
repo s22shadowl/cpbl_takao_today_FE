@@ -6,3 +6,23 @@ globalStyle('body', {
   color: vars.colors.textPrimary,
   backgroundColor: vars.colors.background,
 })
+
+globalStyle('button, select', {
+  color: vars.colors.textPrimary,
+})
+
+globalStyle('html, body', {
+  height: '100%',
+  margin: 0,
+  padding: 0,
+})
+
+// 全域設定 box-sizing
+globalStyle('*, *::before, *::after', {
+  boxSizing: 'border-box',
+})
+
+globalStyle('body', {
+  display: 'flex',
+  flexDirection: 'column',
+})

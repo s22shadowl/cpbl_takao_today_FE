@@ -3,15 +3,22 @@
 import { style } from '@vanilla-extract/css'
 import { vars, breakpoints } from '@/styles/theme.css'
 
+export const pageWrapper = style({
+  display: 'flex',
+  flexDirection: 'column',
+  minHeight: '100vh',
+})
+
 export const mainContainer = style({
+  flex: '1 0 auto',
   maxWidth: '1280px',
   margin: '0 auto',
-  padding: vars.space.lg, // 24px
-  marginTop: vars.space.xl, // 新增：與 Navbar 的間距 (32px)
-  paddingBottom: vars.space.xxl, // 新增：與 Footer 的間距 (48px)
+  padding: vars.space.lg,
+  paddingBottom: vars.space.md,
+  width: '100%',
   '@media': {
     [breakpoints.mobile]: {
-      padding: vars.space.md, // 修改：行動裝置的 padding (16px)
+      padding: vars.space.md,
     },
   },
 })

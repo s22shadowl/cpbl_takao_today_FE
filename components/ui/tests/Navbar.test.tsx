@@ -4,6 +4,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi } from 'vitest'
 import { Navbar } from '../Navbar'
+import { ThemeProvider } from '@/components/providers/ThemeProvider'
 
 // Mock Next.js Link component to prevent jsdom navigation errors
 vi.mock('next/link', () => ({
@@ -35,7 +36,11 @@ vi.mock('next/link', () => ({
 describe('Navbar', () => {
   it('should toggle the mobile menu when the menu button is clicked', async () => {
     const user = userEvent.setup()
-    render(<Navbar />)
+    render(
+      <ThemeProvider>
+        <Navbar />
+      </ThemeProvider>,
+    )
 
     const menuButton = screen.getByRole('button', { name: /toggle navigation menu/i })
 
@@ -57,7 +62,11 @@ describe('Navbar', () => {
 
   it('should close the mobile menu when a navigation link is clicked', async () => {
     const user = userEvent.setup()
-    render(<Navbar />)
+    render(
+      <ThemeProvider>
+        <Navbar />
+      </ThemeProvider>,
+    )
 
     const menuButton = screen.getByRole('button', { name: /toggle navigation menu/i })
 

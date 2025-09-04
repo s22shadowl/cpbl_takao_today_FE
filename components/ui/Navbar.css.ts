@@ -1,23 +1,41 @@
-// /components/ui/Navbar.css.ts
-
 import { style } from '@vanilla-extract/css'
 import { vars, breakpoints } from '@/styles/theme.css'
 
 export const navContainer = style({
+  backgroundColor: vars.colors.primary,
+  borderBottom: `3px solid ${vars.colors.secondary}`,
+  alignItems: 'center',
+  display: 'flex',
+  justifyContent: 'center',
+  position: 'relative',
+})
+
+export const navTextBlock = style({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: `${vars.space.md} ${vars.space.lg}`, // 16px 24px
+  maxWidth: '1200px',
+  width: '100%',
+})
+
+export const titleBlock = style({
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'space-between',
-  padding: `${vars.space.md} ${vars.space.lg}`, // 16px 24px
-  borderBottom: `1px solid ${vars.colors.border}`,
-  position: 'relative',
-  backgroundColor: vars.colors.surface,
+  gap: vars.space.md,
 })
 
 export const titleLink = style({
   fontSize: vars.fontSizes.xl,
   fontWeight: 'bold',
   textDecoration: 'none',
-  color: vars.colors.textPrimary,
+  color: vars.colors.textNav,
+
+  '@media': {
+    [breakpoints.mobile]: {
+      padding: `0`,
+    },
+  },
 })
 
 export const menuButton = style({
@@ -28,7 +46,7 @@ export const menuButton = style({
       background: 'none',
       border: 'none',
       cursor: 'pointer',
-      color: vars.colors.textPrimary,
+      color: vars.colors.textNav,
       zIndex: vars.zIndices.modal,
     },
   },
@@ -36,16 +54,18 @@ export const menuButton = style({
 
 export const dropdownMenu = style({
   display: 'flex',
+  alignItems: 'center',
   '@media': {
     [breakpoints.mobile]: {
       display: 'none',
       position: 'absolute',
-      top: '100%',
+      top: 'calc(100% + 3px)',
       left: 0,
       right: 0,
-      backgroundColor: vars.colors.surface,
-      padding: vars.space.md,
+      backgroundColor: vars.colors.primary,
+      padding: 0,
       zIndex: vars.zIndices.navbar,
+      alignItems: 'stretch', // Reset for mobile layout
     },
   },
   selectors: {
@@ -69,16 +89,24 @@ export const menuList = style({
       width: '100%',
       alignItems: 'flex-start',
       gap: vars.space.md,
+      padding: `${vars.space.md} ${vars.space.lg}`,
     },
   },
 })
 
 export const menuLink = style({
   textDecoration: 'none',
-  color: vars.colors.textSecondary,
+  fontSize: vars.fontSizes.lg,
+  fontWeight: 'bold',
+  color: vars.colors.textNav,
   transition: 'color 0.2s ease-in-out',
   ':hover': {
-    color: vars.colors.textPrimary,
+    color: vars.colors.secondary,
+  },
+  '@media': {
+    [breakpoints.mobile]: {
+      color: vars.colors.textNav,
+    },
   },
 })
 
