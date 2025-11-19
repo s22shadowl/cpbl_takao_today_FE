@@ -10,24 +10,17 @@ import {
   getCoreRowModel,
   getSortedRowModel,
   useReactTable,
+  Row,
+  Cell,
 } from '@tanstack/react-table'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import * as styles from './DataTable.css'
 
-/**
- * 通用 DataTable 的 props 型別。
- * @template TData - 資料列的物件型別。
- * @template TValue - 欄位值的型別。
- */
 interface DataTableProps<TData, TValue> {
-  /** 欄位定義陣列。 */
   columns: ColumnDef<TData, TValue>[]
-  /** 要顯示的資料陣列。 */
   data: TData[]
 }
 
-/**
- * 一個可複用的、由 props 驅動的通用數據表格元件，整合了 @tanstack/react-table 以支援排序功能。
- */
 export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
 
@@ -43,8 +36,6 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
   })
 
   return (
-    // RWD 方案：在容器上啟用水平滾動。
-    // 未來可優化方案：在小螢幕上將每一行轉換為卡片式佈局 (Card-based layout)。
     <div className={styles.tableContainer}>
       <table className={styles.table}>
         <thead className={styles.thead}>

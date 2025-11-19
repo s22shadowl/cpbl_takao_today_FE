@@ -8,10 +8,9 @@ import 'react-day-picker/dist/style.css'
 
 import * as Popover from '@radix-ui/react-popover'
 import { Button } from '@/components/ui/Button'
+import { useIsMobile } from '@/hooks/useIsMobile' // 引入 useIsMobile
 import * as styles from './DateRangePicker.css'
 
-// 1. 使用 `as const` 讓 TypeScript 將 id 推斷為字串字面量型別 ('7d', '30d', 'season')
-//    而非一般的 `string` 型別。這解決了 `no-explicit-any` 的問題。
 const PRESET_RANGES = [
   {
     id: '7d',
@@ -39,7 +38,6 @@ const PRESET_RANGES = [
   },
 ] as const
 
-// 從 PRESET_RANGES 陣列中動態產生型別
 type PresetId = (typeof PRESET_RANGES)[number]['id']
 
 const generateLabel = (range: DateRange | undefined): string => {
@@ -74,9 +72,9 @@ type DateRangePickerProps = {
 }
 
 export const DateRangePicker: React.FC<DateRangePickerProps> = ({ value, onChange, className }) => {
+  const isMobile = useIsMobile() // 呼叫 hook
   const [popoverOpen, setPopoverOpen] = React.useState(false)
 
-  // 函式的參數型別現在可以從 PresetId 動態取得
   const handlePresetSelect = React.useCallback(
     (presetId: PresetId) => {
       const preset = PRESET_RANGES.find((p) => p.id === presetId)
@@ -114,8 +112,6 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ value, onChang
             {PRESET_RANGES.map((preset) => (
               <Button
                 key={preset.id}
-                // 2. 移除 `variant` 屬性或改為你的 Button 元件支援的值。
-                //    此處移除，讓樣式完全由 `presetButton` class 控制，更具彈性。
                 onClick={() => handlePresetSelect(preset.id)}
                 className={styles.presetButton}
               >
@@ -129,7 +125,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ value, onChang
             month={value?.from}
             selected={value}
             onSelect={handleCustomRangeSelect}
-            numberOfMonths={2}
+            numberOfMonths={isMobile ? 1 : 2} // 動態設定月份數量
           />
         </Popover.Content>
       </Popover.Portal>
