@@ -26,7 +26,7 @@ async function handler(req: NextRequest) {
   // 2. 進入安全區塊 (所有可能報錯的邏輯都在這裡)
   try {
     if (!backendApiUrl || !backendApiKey) {
-      throw new Error('Missing BACKEND_API_URL or BACKEND_API_KEY')
+      throw new Error('Missing Config')
     }
 
     // 自動修剪空格 (Trim) 並補上 https
@@ -41,43 +41,49 @@ async function handler(req: NextRequest) {
     const searchParams = req.nextUrl.search
     const targetUrl = `${backendApiUrl}/api/${path}${searchParams}`
 
-    // Debug: 印出實際請求網址 (請去 Vercel Logs 看這行)
-    console.log(`[Proxy Config] URL: ${backendApiUrl}, Target: ${targetUrl}`)
+    console.log(`[Proxy] Fetching: ${targetUrl}`)
 
-    // 4. 處理 Headers
-    const headers = new Headers()
-    headers.set('Content-Type', req.headers.get('Content-Type') || 'application/json')
-    headers.set('Accept', 'application/json')
-    headers.set('X-API-Key', backendApiKey)
-    // 確保 Host 正確
-    headers.set('Host', new URL(backendApiUrl).host)
+    // 4.請求 Header
+    const requestHeaders = new Headers()
+    requestHeaders.set('Content-Type', req.headers.get('Content-Type') || 'application/json')
+    requestHeaders.set('Accept', 'application/json')
+    requestHeaders.set('X-API-Key', backendApiKey)
+    requestHeaders.set('Host', new URL(backendApiUrl).host)
 
     // 5. 發送請求
     const response = await fetch(targetUrl, {
       method: req.method,
-      headers: headers,
+      headers: requestHeaders,
       // GET/HEAD 不帶 body
       body: req.method !== 'GET' && req.method !== 'HEAD' ? req.body : undefined,
-      // @ts-expect-error: Next.js specific option
+      // @ts-expect-error: Next.js duplex option
       duplex: 'half',
     })
 
-    return response
+    // ----------------------------------------------------------------
+    // 【關鍵修正】清洗回應 Header，解決 ERR_CONTENT_DECODING_FAILED
+    // ----------------------------------------------------------------
+    const responseHeaders = new Headers(response.headers)
 
+    // 移除壓縮編碼 Header，因為 Node.js fetch 已經幫我們解壓縮了
+    // 如果不移除，瀏覽器會試圖再次解壓縮導致崩潰
+    responseHeaders.delete('content-encoding')
+    responseHeaders.delete('transfer-encoding')
+    responseHeaders.delete('content-length') // 讓 Vercel 自動重新計算長度
+
+    // 回傳新的 Response
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: responseHeaders,
+    })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     // 這裡會捕捉所有錯誤 (包含 URL 格式錯、連線失敗等)
-    console.error('[Proxy Error]', error)
-    return new Response(
-      JSON.stringify({
-        error: 'Proxy Error',
-        details: error.message,
-        debugUrl: backendApiUrl, // 回傳這個讓你在瀏覽器就能看到讀到了什麼
-      }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    )
+    console.error('[Proxy Fatal]', error)
+    return new Response(JSON.stringify({ error: 'Proxy Error', details: error.message }), {
+      status: 502,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 }
