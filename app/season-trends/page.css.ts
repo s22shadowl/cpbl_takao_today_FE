@@ -1,5 +1,3 @@
-// /app/season-trends/page.css.ts
-
 import { style, keyframes } from '@vanilla-extract/css'
 import { vars } from '@/styles/theme.css'
 
@@ -7,7 +5,7 @@ export const container = style({
   maxWidth: '1200px',
   margin: '0 auto',
   padding: vars.space.lg,
-  paddingTop: `calc(60px + ${vars.space.lg})`, // 為 fixed Navbar 增加頂部間距
+  paddingTop: vars.space.lg,
 })
 
 export const header = style({
@@ -22,6 +20,7 @@ export const header = style({
 export const title = style({
   fontSize: vars.fontSizes.xxl,
   fontWeight: 700,
+  color: vars.colors.textPrimary,
 })
 
 export const controlsContainer = style({
@@ -30,11 +29,104 @@ export const controlsContainer = style({
   gap: vars.space.md,
 })
 
-export const playerSelect = style({
-  padding: '8px',
+// --- Radix Select 相關樣式 ---
+
+export const selectTrigger = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  minWidth: '180px',
+  borderRadius: '6px',
+  padding: `0 ${vars.space.md}`,
+  height: '36px',
+  fontSize: vars.fontSizes.base,
+  gap: vars.space.sm,
+  backgroundColor: vars.colors.surface,
+  border: `1px solid ${vars.colors.border}`,
+  color: vars.colors.textPrimary,
+  cursor: 'pointer',
+  ':hover': {
+    backgroundColor: vars.colors.background,
+  },
+  ':focus': {
+    outline: 'none',
+    boxShadow: `0 0 0 2px ${vars.colors.primary}`,
+  },
+  selectors: {
+    '&[data-placeholder]': {
+      color: vars.colors.textSecondary,
+    },
+  },
+})
+
+export const selectIcon = style({
+  color: vars.colors.textSecondary,
+})
+
+const slideUpAndFade = keyframes({
+  '0%': { opacity: 0, transform: 'translateY(2px)' },
+  '100%': { opacity: 1, transform: 'translateY(0)' },
+})
+
+const slideDownAndFade = keyframes({
+  '0%': { opacity: 0, transform: 'translateY(-2px)' },
+  '100%': { opacity: 1, transform: 'translateY(0)' },
+})
+
+export const selectContent = style({
+  zIndex: vars.zIndices.dropdown,
+  minWidth: 'var(--radix-select-trigger-width)',
+  overflow: 'hidden',
+  backgroundColor: vars.colors.surface,
   borderRadius: '6px',
   border: `1px solid ${vars.colors.border}`,
-  backgroundColor: vars.colors.surface,
+  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+  animationDuration: '400ms',
+  animationTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+  willChange: 'transform, opacity',
+  selectors: {
+    '&[data-state="open"]': {
+      animationName: slideDownAndFade,
+    },
+    '&[data-state="closed"]': {
+      animationName: slideUpAndFade,
+    },
+  },
+})
+
+export const selectViewport = style({
+  padding: vars.space.sm,
+})
+
+export const selectItem = style({
+  fontSize: vars.fontSizes.base,
+  lineHeight: 1,
+  color: vars.colors.textPrimary,
+  borderRadius: '3px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between', // 修改：讓文字和打勾分開
+  height: '25px',
+  padding: `0 ${vars.space.sm}`, // 修改：調整 padding
+  position: 'relative',
+  userSelect: 'none',
+  outline: 'none',
+  cursor: 'pointer',
+  selectors: {
+    '&[data-disabled]': {
+      color: vars.colors.textSecondary,
+      pointerEvents: 'none',
+    },
+    '&[data-highlighted]': {
+      // 修改：使用主題變數來反轉顏色
+      backgroundColor: vars.colors.textPrimary,
+      color: vars.colors.surface,
+    },
+  },
+})
+
+export const selectItemIndicator = style({
+  // 移除絕對定位，讓它成為 flex item
 })
 
 export const loadingOrErrorState = style({
@@ -73,7 +165,6 @@ export const spinner = style({
   animation: `${spin} 1s linear infinite`,
 })
 
-// 使用 Flexbox 替代 Grid 以解決跑版問題
 export const contentGrid = style({
   display: 'flex',
   flexDirection: 'row',
@@ -86,24 +177,22 @@ export const contentGrid = style({
   },
 })
 
-// 保留 sticky 定位，並設定固定寬度
 export const calendarContainer = style({
-  flex: '0 0 300px', // 設定固定寬度且不縮放
+  flex: '0 0 300px',
   position: 'sticky',
-  top: `calc(60px + ${vars.space.lg})`, // sticky 的 top 值也要加上 Navbar 高度
+  top: `calc(60px + ${vars.space.lg})`,
   '@media': {
     'screen and (max-width: 1024px)': {
       flex: '1 1 100%',
       width: '100%',
-      position: 'static', // 在移動端取消 sticky
+      position: 'static',
     },
   },
 })
 
-// 設定為可伸縮以填滿剩餘空間
 export const mainContentContainer = style({
   flex: '1 1 0',
-  minWidth: 0, // 防止內容溢出
+  minWidth: 0,
   display: 'flex',
   flexDirection: 'column',
   gap: vars.space.lg,
@@ -115,6 +204,7 @@ export const collapsibleTrigger = style({
   border: `1px solid ${vars.colors.border}`,
   borderRadius: '6px',
   backgroundColor: vars.colors.surface,
+  color: vars.colors.textPrimary,
   cursor: 'pointer',
   textAlign: 'center',
   marginTop: vars.space.md,
@@ -123,6 +213,64 @@ export const collapsibleTrigger = style({
   },
 })
 
+export const collapsibleWrapper = style({
+  // overflow: 'hidden', // This was preventing the DataTable's scrollbar
+})
+
 export const collapsibleContent = style({
   paddingTop: vars.space.md,
+  maxWidth: '100%',
+})
+
+export const paginatorContainer = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: vars.space.md,
+  marginBottom: vars.space.md,
+})
+
+export const paginatorMonth = style({
+  minWidth: '100px',
+  textAlign: 'center',
+  fontWeight: 600,
+  color: vars.colors.textPrimary,
+})
+
+export const desktopControls = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.md,
+  '@media': {
+    'screen and (max-width: 768px)': {
+      display: 'none',
+    },
+  },
+})
+
+export const mobileControls = style({
+  display: 'none',
+  position: 'relative',
+  '@media': {
+    'screen and (max-width: 768px)': {
+      display: 'block',
+    },
+  },
+})
+
+export const mobileMenuTrigger = style({
+  position: 'absolute',
+  top: '-1rem',
+  right: '0rem',
+})
+
+export const dropdownContent = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space.md,
+  padding: vars.space.md,
+  backgroundColor: vars.colors.surface,
+  border: `1px solid ${vars.colors.border}`,
+  borderRadius: vars.space.sm,
+  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
 })

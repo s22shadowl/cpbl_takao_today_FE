@@ -16,6 +16,12 @@ jobs:
     # 運行環境
     runs-on: ubuntu-latest
 
+    # 【新增】設定環境變數，從 GitHub Secrets 注入
+    # 這樣之後的 npm run build/test 都能讀取到 process.env.BACKEND_API_URL 等變數
+    env:
+      BACKEND_API_URL: ${{ secrets.BACKEND_API_URL }}
+      BACKEND_API_KEY: ${{ secrets.BACKEND_API_KEY }}
+
     # 執行步驟
     steps:
       # Step 1: Checkout Code
@@ -37,10 +43,12 @@ jobs:
         run: npm run lint
 
       # Step 5: Run TypeScript Check (Next.js build includes this)
+      # Next.js 建置時可能會檢查 API Route，因此這裡需要上述的 env
       - name: Run TypeScript Check
         run: npm run build
 
       # Step 6: Run Unit & Component Tests
+      # 測試如果涉及 API 呼叫或模擬環境變數，也需要上述的 env
       - name: Run Unit & Component Tests
         run: npm run test
 

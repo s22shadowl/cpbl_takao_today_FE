@@ -9,14 +9,15 @@ import { SituationalAtBatsTab } from '@/components/features/advanced-analysis/Si
 import { IbbImpactTab } from '@/components/features/advanced-analysis/IbbImpactTab'
 import { NPBStreaksTab } from '@/components/features/advanced-analysis/NPBStreaksTab'
 import { RaccoonTrioTab } from '@/components/features/advanced-analysis/RaccoonTrioTab'
-import { PositionInfieldTab } from '@/components/features/advanced-analysis/PositionInfieldTab' // 匯入新元件
+import { PositionInfieldTab } from '@/components/features/advanced-analysis/PositionInfieldTab'
 import { situational_at_bats_tab_players, scoring_position_tab_players } from '@/lib/constants'
+import { Card } from '@/components/ui/Card' // 匯入 Card
 import * as styles from './page.css'
 
 // 頁籤設定資料
 const analysisTabs = [
   { value: 'homerun-tracking', title: '百轟倒數' },
-  { value: 'position-infield', title: '二壘大風吹' }, // 加入新分頁
+  { value: 'position-infield', title: '二壘大風吹' },
   { value: 'bases-loaded', title: '滿壘大王' },
   { value: 'scoring-position', title: '得點圈之鬼' },
   { value: 'ibb-impact', title: 'IBB大哥' },
@@ -30,58 +31,59 @@ const analysisTabs = [
 const AdvancedAnalysisPage = () => {
   return (
     <main className={styles.container}>
-      <h1 className={styles.title}>進階數據分析</h1>
+      <Card>
+        <h1 className={styles.title}>進階數據分析</h1>
+        <Tabs defaultValue={analysisTabs[0].value}>
+          <TabsList>
+            {analysisTabs.map((tab) => (
+              <TabsTrigger key={tab.value} value={tab.value}>
+                {tab.title}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-      <Tabs defaultValue={analysisTabs[0].value}>
-        <TabsList>
-          {analysisTabs.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value}>
-              {tab.title}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+          {/* 全壘打追蹤頁籤 */}
+          <TabsContent value="homerun-tracking">
+            <HomerunTrackingTab />
+          </TabsContent>
 
-        {/* 全壘打追蹤頁籤 */}
-        <TabsContent value="homerun-tracking">
-          <HomerunTrackingTab />
-        </TabsContent>
+          {/* 二壘大風吹頁籤 */}
+          <TabsContent value="position-infield">
+            <PositionInfieldTab />
+          </TabsContent>
 
-        {/* 二壘大風吹頁籤 */}
-        <TabsContent value="position-infield">
-          <PositionInfieldTab />
-        </TabsContent>
+          {/* 滿壘大王頁籤 */}
+          <TabsContent value="bases-loaded">
+            <SituationalAtBatsTab
+              players={situational_at_bats_tab_players}
+              situation="bases_loaded"
+            />
+          </TabsContent>
 
-        {/* 滿壘大王頁籤 */}
-        <TabsContent value="bases-loaded">
-          <SituationalAtBatsTab
-            players={situational_at_bats_tab_players}
-            situation="bases_loaded"
-          />
-        </TabsContent>
+          {/* 得點圈表現頁籤 */}
+          <TabsContent value="scoring-position">
+            <SituationalAtBatsTab
+              players={scoring_position_tab_players}
+              situation="scoring_position"
+            />
+          </TabsContent>
 
-        {/* 得點圈表現頁籤 */}
-        <TabsContent value="scoring-position">
-          <SituationalAtBatsTab
-            players={scoring_position_tab_players}
-            situation="scoring_position"
-          />
-        </TabsContent>
+          {/* 關鍵保送分析頁籤 */}
+          <TabsContent value="ibb-impact">
+            <IbbImpactTab />
+          </TabsContent>
 
-        {/* 關鍵保送分析頁籤 */}
-        <TabsContent value="ibb-impact">
-          <IbbImpactTab />
-        </TabsContent>
+          {/* 日職三連星頁籤 */}
+          <TabsContent value="npb-streaks">
+            <NPBStreaksTab />
+          </TabsContent>
 
-        {/* 日職三連星頁籤 */}
-        <TabsContent value="npb-streaks">
-          <NPBStreaksTab />
-        </TabsContent>
-
-        {/* 浣熊三兄弟頁籤 */}
-        <TabsContent value="raccoon-trio">
-          <RaccoonTrioTab />
-        </TabsContent>
-      </Tabs>
+          {/* 浣熊三兄弟頁籤 */}
+          <TabsContent value="raccoon-trio">
+            <RaccoonTrioTab />
+          </TabsContent>
+        </Tabs>
+      </Card>
     </main>
   )
 }

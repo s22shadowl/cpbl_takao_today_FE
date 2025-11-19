@@ -6,6 +6,12 @@ export const triggerButton = style({
   justifyContent: 'space-between',
   textAlign: 'left',
   fontWeight: 400,
+  '@media': {
+    'screen and (max-width: 768px)': {
+      width: '100%',
+      minWidth: '180px',
+    },
+  },
 })
 
 export const calendarIcon = style({

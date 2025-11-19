@@ -4,8 +4,9 @@
 
 import * as React from 'react'
 import { addDays, startOfMonth } from 'date-fns'
-import { Check, Loader2 } from 'lucide-react'
+import { Check, Loader2, Menu, ChevronDown } from 'lucide-react' // 引入 ChevronDown icon
 import * as Collapsible from '@radix-ui/react-collapsible'
+import * as Select from '@radix-ui/react-select' // 引入 Radix Select
 import { DateRange } from 'react-day-picker'
 import { type ColumnDef } from '@tanstack/react-table'
 import {
@@ -19,6 +20,7 @@ import {
 import { Button } from '@/components/ui/Button'
 import { useGetPlayersSeasonStats } from '@/hooks/useGetPlayersSeasonStats'
 import { useGetSeasonGames } from '@/hooks/useGetSeasonGames'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { TARGET_TEAM_PLAYERS } from '@/lib/constants'
 import { PLAYER_STATS_METRICS } from '@/lib/configs/metrics'
 import { FEATURE_FLAGS } from '@/lib/configs/featureFlags'
@@ -29,6 +31,7 @@ import {
   type CalendarDayData,
 } from '@/components/features/charts/EventCalendarChart'
 import { DataTable } from '@/components/ui/DataTable'
+import { Card } from '@/components/ui/Card'
 import * as styles from './page.css'
 import type { components } from '@/types/generated-api'
 
@@ -46,10 +49,7 @@ const MetricSelector = ({
     const newSelection = selectedMetrics.includes(metricKey)
       ? selectedMetrics.filter((key) => key !== metricKey)
       : [...selectedMetrics, metricKey]
-
-    if (newSelection.length > 3) {
-      return
-    }
+    if (newSelection.length > 3) return
     onSelectionChange(newSelection)
   }
 
@@ -82,8 +82,53 @@ const MetricSelector = ({
   )
 }
 
+// 修改：使用 Radix Select 重構 Controls 元件
+const Controls = ({
+  selectedPlayer,
+  onPlayerChange,
+  selectedMetrics,
+  onMetricsChange,
+  dateRange,
+  onDateChange,
+}: {
+  selectedPlayer: string
+  onPlayerChange: (value: string) => void
+  selectedMetrics: string[]
+  onMetricsChange: (value: string[]) => void
+  dateRange: DateRange | undefined
+  onDateChange: (value: DateRange | undefined) => void
+}) => (
+  <>
+    <Select.Root value={selectedPlayer} onValueChange={onPlayerChange}>
+      <Select.Trigger className={styles.selectTrigger} aria-label="選擇球員">
+        <Select.Value placeholder="選擇球員" />
+        <Select.Icon className={styles.selectIcon}>
+          <ChevronDown size={16} />
+        </Select.Icon>
+      </Select.Trigger>
+      <Select.Portal>
+        <Select.Content className={styles.selectContent} position="popper" sideOffset={5}>
+          <Select.Viewport className={styles.selectViewport}>
+            {TARGET_TEAM_PLAYERS.map((player) => (
+              <Select.Item key={player} value={player} className={styles.selectItem}>
+                <Select.ItemText>{player}</Select.ItemText>
+                <Select.ItemIndicator className={styles.selectItemIndicator}>
+                  <Check size={14} />
+                </Select.ItemIndicator>
+              </Select.Item>
+            ))}
+          </Select.Viewport>
+        </Select.Content>
+      </Select.Portal>
+    </Select.Root>
+    <MetricSelector selectedMetrics={selectedMetrics} onSelectionChange={onMetricsChange} />
+    <DateRangePicker value={dateRange} onChange={onDateChange} />
+  </>
+)
+
 // --- 主頁面元件 ---
 export default function SeasonTrendsPage() {
+  const isMobile = useIsMobile()
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>(() => {
     const end = new Date()
     const start = addDays(end, -29)
@@ -164,44 +209,35 @@ export default function SeasonTrendsPage() {
     [selectedMetrics]
   )
 
-  const tableColumns: ColumnDef<PlayerSeasonStatsHistory>[] = React.useMemo(
-    () => [
-      { accessorKey: 'data_retrieved_date', header: '日期' },
-      { accessorKey: 'hits', header: '安打' },
-      { accessorKey: 'at_bats', header: '打數' },
-      { accessorKey: 'homeruns', header: '全壘打' },
-      { accessorKey: 'rbi', header: '打點' },
-      {
-        accessorKey: 'avg',
-        header: '打擊率',
+  const tableColumns = React.useMemo<ColumnDef<PlayerSeasonStatsHistory>[]>(() => {
+    const dateColumn: ColumnDef<PlayerSeasonStatsHistory> = {
+      accessorKey: 'data_retrieved_date',
+      header: '日期',
+    }
+
+    const metricColumns: ColumnDef<PlayerSeasonStatsHistory>[] = activeChartMetrics.map(
+      (metric) => ({
+        accessorKey: metric.key,
+        header: metric.label,
         cell: ({ row }) => {
-          const avg = row.original.avg
-          return typeof avg === 'number' ? avg.toFixed(3) : '.000'
+          const value = row.getValue(metric.key)
+          // The formatter function from metrics config is expected to handle the formatting.
+          return metric.formatter(value as number)
         },
-      },
-      {
-        accessorKey: 'ops',
-        header: '攻擊指數',
-        cell: ({ row }) => {
-          const ops = row.original.ops
-          return typeof ops === 'number' ? ops.toFixed(3) : '.000'
-        },
-      },
-    ],
-    []
-  )
+      }),
+    )
+
+    return [dateColumn, ...metricColumns]
+  }, [activeChartMetrics])
 
   const renderContent = () => {
     if (isLoading) return <div className={styles.loadingOrErrorState}>Loading...</div>
-
-    if (isError) {
+    if (isError)
       return (
         <div className={styles.loadingOrErrorState}>
           Error: {error instanceof Error ? error.message : 'An unknown error occurred'}
         </div>
       )
-    }
-
     if (PlayersSeasonData) {
       return (
         <div className={styles.dataDisplayContainer}>
@@ -210,8 +246,8 @@ export default function SeasonTrendsPage() {
               <Loader2 size={32} className={styles.spinner} />
             </div>
           )}
-          <div className={styles.contentGrid}>
-            {FEATURE_FLAGS.enableSeasonTrendsCalendar && (
+          {FEATURE_FLAGS.enableSeasonTrendsCalendar ? (
+            <div className={styles.contentGrid}>
               <div className={styles.calendarContainer}>
                 <EventCalendarChart
                   title={`${selectedPlayer} 出賽日曆`}
@@ -234,52 +270,82 @@ export default function SeasonTrendsPage() {
                   }}
                 />
               </div>
-            )}
+              <div className={styles.mainContentContainer}>
+                <StatsTrendChart data={currentPlayerStats} metrics={activeChartMetrics} />
+                <div className={styles.collapsibleWrapper}>
+                  <Collapsible.Root>
+                    <Collapsible.Trigger asChild>
+                      <button className={styles.collapsibleTrigger}>顯示/隱藏 每日詳細數據</button>
+                    </Collapsible.Trigger>
+                    <Collapsible.Content>
+                      <div className={styles.collapsibleContent}>
+                        <DataTable data={currentPlayerStats} columns={tableColumns} />
+                      </div>
+                    </Collapsible.Content>
+                  </Collapsible.Root>
+                </div>
+              </div>
+            </div>
+          ) : (
             <div className={styles.mainContentContainer}>
               <StatsTrendChart data={currentPlayerStats} metrics={activeChartMetrics} />
-              <Collapsible.Root>
-                <Collapsible.Trigger asChild>
-                  <button className={styles.collapsibleTrigger}>顯示/隱藏 每日詳細數據</button>
-                </Collapsible.Trigger>
-                <Collapsible.Content>
-                  <div className={styles.collapsibleContent}>
-                    <DataTable data={currentPlayerStats} columns={tableColumns} />
-                  </div>
-                </Collapsible.Content>
-              </Collapsible.Root>
+              <div className={styles.collapsibleWrapper}>
+                <Collapsible.Root>
+                  <Collapsible.Trigger asChild>
+                    <button className={styles.collapsibleTrigger}>顯示/隱藏 每日詳細數據</button>
+                  </Collapsible.Trigger>
+                  <Collapsible.Content>
+                    <div className={styles.collapsibleContent}>
+                      <DataTable data={currentPlayerStats} columns={tableColumns} />
+                    </div>
+                  </Collapsible.Content>
+                </Collapsible.Root>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )
     }
-
     return null
+  }
+
+  const controlProps = {
+    selectedPlayer,
+    onPlayerChange: setSelectedPlayer,
+    selectedMetrics,
+    onMetricsChange: setSelectedMetrics,
+    dateRange,
+    onDateChange: setDateRange,
   }
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>賽季趨勢</h1>
-        <div className={styles.controlsContainer}>
-          <select
-            value={selectedPlayer}
-            onChange={(e) => setSelectedPlayer(e.target.value)}
-            className={styles.playerSelect}
-          >
-            {TARGET_TEAM_PLAYERS.map((player) => (
-              <option key={player} value={player}>
-                {player}
-              </option>
-            ))}
-          </select>
-          <MetricSelector
-            selectedMetrics={selectedMetrics}
-            onSelectionChange={setSelectedMetrics}
-          />
-          <DateRangePicker value={dateRange} onChange={setDateRange} />
-        </div>
-      </header>
-      <main>{renderContent()}</main>
+      <Card>
+        <header className={styles.header}>
+          <h1 className={styles.title}>賽季趨勢</h1>
+          {isMobile ? (
+            <div className={styles.mobileControls}>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild className={styles.mobileMenuTrigger}>
+                  <Button variant="ghost" size="icon">
+                    <Menu />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <div className={styles.dropdownContent}>
+                    <Controls {...controlProps} />
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ) : (
+            <div className={styles.desktopControls}>
+              <Controls {...controlProps} />
+            </div>
+          )}
+        </header>
+        <main>{renderContent()}</main>
+      </Card>
     </div>
   )
 }

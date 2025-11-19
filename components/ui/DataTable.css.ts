@@ -12,11 +12,16 @@ export const tableContainer = style({
 })
 
 export const table = style({
-  width: '100%',
-  minWidth: '600px', // 確保在小螢幕上內容不會過度壓縮，觸發滾動
   borderCollapse: 'collapse',
   textAlign: 'left',
   fontFamily: vars.fontFamily.body,
+  tableLayout: 'auto',
+  '@media': {
+    'screen and (min-width: 768px)': {
+      width: '100%',
+      tableLayout: 'fixed',
+    },
+  },
 })
 
 export const thead = style({

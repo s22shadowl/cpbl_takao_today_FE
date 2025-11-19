@@ -14,6 +14,14 @@ export const tabsList = style({
   flexShrink: 0,
   display: 'flex',
   borderBottom: `1px solid ${vars.colors.border}`,
+  overflowX: 'auto',
+
+  // Hide scrollbar for Webkit browsers
+  '::-webkit-scrollbar': {
+    display: 'none',
+  },
+  // Hide scrollbar for Firefox
+  scrollbarWidth: 'none',
 })
 
 export const tabsTrigger = style({
@@ -21,7 +29,8 @@ export const tabsTrigger = style({
   backgroundColor: 'transparent',
   padding: `${vars.space.sm} ${vars.space.md}`,
   height: '45px',
-  flex: 1,
+  flex: '0 0 auto', // Prevent shrinking, allow natural width
+  whiteSpace: 'nowrap', // Prevent text wrapping
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',

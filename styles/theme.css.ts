@@ -19,6 +19,7 @@ export const vars = createThemeContract({
     surface: null,
     textPrimary: null,
     textSecondary: null,
+    textNav: null,
     border: null,
     success: null,
     error: null,
@@ -66,6 +67,7 @@ export const lightTheme = createTheme(vars, {
     surface: '#FFFFFF',
     textPrimary: '#1A202C',
     textSecondary: '#718096',
+    textNav: '#FFFFFF',
     border: '#E2E8F0',
     success: '#38A169',
     error: '#E53E3E',
@@ -99,21 +101,18 @@ export const lightTheme = createTheme(vars, {
 })
 
 // =================================================================
-// DARK THEME (深色主題)
+// DARK THEME (深色主題) - REVISED
 // =================================================================
-// 這是「鋼鐵之翼」視覺主題的深色模式實作。
-// 當需要調整深色模式的具體數值時，請在此處修改。
-// =================================================================
-
 export const darkTheme = createTheme(vars, {
   colors: {
     primary: '#068D69',
     secondary: '#FFC72C',
-    background: '#121212',
-    surface: '#1E1E1E',
-    textPrimary: '#EAEAEA',
+    background: '#121212', // 維持純黑背景以提供最高對比度
+    surface: '#1E1E1E', // 卡片顏色
+    textPrimary: '#E0E0E0', // 稍微降低文字亮度，使其更柔和
     textSecondary: '#A0AEC0',
-    border: '#4A5568',
+    textNav: '#FFFFFF',
+    border: '#333333', // 使用更深、更中性的灰色作為邊框
     success: '#68D391',
     error: '#FC8181',
     warning: '#F6AD55',
@@ -144,3 +143,12 @@ export const darkTheme = createTheme(vars, {
     modal: '1100',
   },
 })
+
+// =================================================================
+// BREAKPOINTS (RWD 斷點)
+// =================================================================
+// 統一定義 RWD 斷點，方便在 style.css.ts 檔案中引用。
+// =================================================================
+export const breakpoints = {
+  mobile: 'screen and (max-width: 768px)',
+}
